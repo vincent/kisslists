@@ -3,7 +3,6 @@ package pkg
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"log"
 
 	// sqlite
@@ -98,7 +97,6 @@ func (store *SqliteStore) AddItem(item *Item) *Item {
 		log.Println(err)
 	}
 	id, err := res.LastInsertId()
-	fmt.Println(id, err)
 	return store.GetItem(id)
 }
 

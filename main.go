@@ -15,7 +15,7 @@ import (
 
 var (
 	dbfile   = flag.String("database", "./sharedlists.sqlite", "SQLite database file")
-	addr     = flag.String("addr", ":3000", "HTTP service address")
+	addr     = flag.String("port", ":80", "HTTP service address")
 	filename string
 )
 
