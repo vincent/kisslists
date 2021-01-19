@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<style>
+	.todo-list {
+		background: #FFF;
+		font-size: 2em;
+		max-width: 50%;
+		margin: auto;
+		padding: 0.5em 1em;
+		box-shadow: 0 5px 30px rgba(0, 0, 0, 0.2);
+	}
+
+	.todo {
+		display: block;
+		position: relative;
+		padding: 1em 1em 1em 16%;
+		margin: 0 auto;
+		cursor: pointer;
+		border-bottom: solid 1px #ddd;
+	}
+
+	.todo:last-child {
+		border-bottom: none;
+	}
+
+	.todo__state {
+		position: absolute;
+		top: 0;
+		left: 0;
+		opacity: 0;
+	}
+
+	.todo__text {
+		color: #135156;
+		transition: all 0.4s linear 0.4s;
+	}
+
+	.todo__icon {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: auto;
+		margin: auto;
+		fill: none;
+		stroke: #27FDC7;
+		stroke-width: 2;
+		stroke-linejoin: round;
+		stroke-linecap: round;
+	}
+
+	.todo__line,
+	.todo__box,
+	.todo__check {
+		transition: stroke-dashoffset 0.2s cubic-bezier(0.9, 0, 0.5, 1);
+	}
+
+	.todo__circle {
+		stroke: #27FDC7;
+		stroke-dasharray: 1 6;
+		stroke-width: 0;
+		transform-origin: 13.5px 12.5px;
+		transform: scale(0.4) rotate(0deg);
+		-webkit-animation: none 0.2s linear;
+		animation: none 0.2s linear;
+	}
+
+	@-webkit-keyframes explode {
+		30% {
+			stroke-width: 3;
+			stroke-opacity: 1;
+			transform: scale(0.8) rotate(40deg);
+		}
+
+		100% {
+			stroke-width: 0;
+			stroke-opacity: 0;
+			transform: scale(1.1) rotate(60deg);
+		}
+	}
+
+	@keyframes explode {
+		30% {
+			stroke-width: 3;
+			stroke-opacity: 1;
+			transform: scale(0.8) rotate(40deg);
+		}
+
+		100% {
+			stroke-width: 0;
+			stroke-opacity: 0;
+			transform: scale(1.1) rotate(60deg);
+		}
+	}
+
+	.todo__box {
+		stroke-dasharray: 56.1053, 56.1053;
+		stroke-dashoffset: 0;
+		transition-delay: 0.16s;
+	}
+
+	.todo__check {
+		stroke: #447b7f;
+		stroke-dasharray: 9.8995, 9.8995;
+		stroke-dashoffset: 9.8995;
+		transition-duration: 0.32s;
+	}
+
+	.todo__line {
+		stroke-dasharray: 168, 1684;
+		stroke-dashoffset: 168;
+		stroke-width: 1px;
+    	opacity: .6;
+	}
+
+	.todo__circle {
+		-webkit-animation-delay: 0.26s;
+		animation-delay: 0.26s;
+		-webkit-animation-duration: 0.26s;
+		animation-duration: 0.26s;
+	}
+
+	.todo__state:checked~.todo__text {
+		transition-delay: 0s;
+		color: #135156;
+		opacity: 0.6;
+	}
+
+	.todo__state:checked~.todo__icon .todo__box {
+		stroke-dashoffset: 56.1053;
+		transition-delay: 0s;
+	}
+
+	.todo__state:checked~.todo__icon .todo__line {
+		stroke-dashoffset: -8;
+	}
+
+	.todo__state:checked~.todo__icon .todo__check {
+		stroke-dashoffset: 0;
+		transition-delay: 0.48s;
+	}
+
+	.todo__state:checked~.todo__icon .todo__circle {
+		-webkit-animation-name: explode;
+		animation-name: explode;
+	}
+
+	.todo__write {
+		font-size: 1em;
+		border: none;
+	}
+
+	html {
+		background: #ddd;
+		height: 100%;
+		display: flex;
+		font-family: 'Helvetica';
+	}
+
+	body {
+		opacity: 0.5;
+		width: 100%;
+		margin: auto;
+	}
+</style>
+
+<svg viewBox="0 0 0 0" style="position: absolute; z-index: -1; opacity: 0;">
+	<defs>
+		<linearGradient id="boxGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="25" y2="25">
+			<stop offset="0%" stop-color="#27FDC7" />
+			<stop offset="100%" stop-color="#0FC0F5" />
+		</linearGradient>
+
+		<linearGradient id="lineGradient">
+			<stop offset="0%" stop-color="#0FC0F5" />
+			<stop offset="100%" stop-color="#27FDC7" />
+		</linearGradient>
+
+		<path id="todo__line" stroke="url(#lineGradient)" d="M21 12.3h168v0.1z"></path>
+		<path id="todo__box" stroke="url(#boxGradient)"
+			d="M21 12.7v5c0 1.3-1 2.3-2.3 2.3H8.3C7 20 6 19 6 17.7V7.3C6 6 7 5 8.3 5h10.4C20 5 21 6 21 7.3v5.4"></path>
+		<path id="todo__check" stroke="url(#boxGradient)" d="M10 13l2 2 5-5"></path>
+		<circle id="todo__circle" cx="13.5" cy="12.5" r="10"></circle>
+	</defs>
+</svg>
+
+
+<div class="todo-list">
+	<label class="todo">
+		<form action="/api/create" method="POST" id="form" onsubmit="onAddItem()">
+			<input type="text" disabled class="todo__text todo__write" id="todo-write" placeholder="New item" />
+		</form>
+	</label>
+	<div id="todo-list"></div>
+	<div id="done-list"></div>
+</div>
+
+<script>
+	var input = document.getElementById('todo-write')
+	var form = document.getElementById('form')
+	var todoList = document.getElementById('todo-list')
+	var doneList = document.getElementById('done-list')
+	var listId = location.hash
+	var delay = 0
+	var timeout
+	var sock
+	;
+
+	function startWebsocket() {
+		sock = new WebSocket("ws://{{.Host}}/ws");
+
+		sock.onclose = function (event) {
+			document.body.style.opacity = .5
+			input.setAttribute('disabled', true)
+
+			console.log('connection closed')
+
+			sock = null
+			delay = (delay > 10*1000) ? delay : (delay + 200)
+			timeout = setTimeout(startWebsocket, delay)
+		}
+
+		sock.onmessage = function (event) {
+			try {
+				var data = [].concat(JSON.parse(event.data));
+				data.forEach(item => {
+					var exists = document.getElementById(`item-${item.itemId}`)
+					if (exists) {
+						document.getElementById(`item-${item.itemId}`).remove()
+					}
+					var node = document.createElement('div')
+					node.innerHTML = itemTpl(item)
+					setTimeout(registerChangeCallbackFn(node.firstElementChild, item), 1);
+					(item.isChecked ? doneList : todoList).prepend(node.firstElementChild)
+				})
+			} catch (e) {
+				console.error(e)
+			}
+		}
+
+		sock.onopen = function () {
+			console.log('connection openned')
+			input.removeAttribute('disabled')
+			document.body.style.opacity = 1
+			sock.send(JSON.stringify({
+				method: 'GetItems',
+				listId
+			}))
+		}
+	}
+
+	if (!location.hash) location = `/#${uuid()}`
+	else startWebsocket()
+	window.addEventListener('offline', function(e) {
+		console.log('offline')
+		clearTimeout(timeout)
+		if (sock) sock.onclose()
+	});
+	window.addEventListener('online', function(e) {
+		console.log('online');
+		clearTimeout(timeout)
+		if (sock) sock.onclose()
+		startWebsocket()
+	});
+
+	function reconnectWebsocket() {
+		if (sock) sock.onclose()
+		startWebsocket()
+	}
+
+	function registerChangeCallbackFn(node, item) {
+		return _ => node.querySelector('input').addEventListener('change', event => {
+			onUpdateItem(+event.target.id.replace('check-', ''), event.target.checked)
+		})
+	}
+
+	function onAddItem() {
+		event.preventDefault()
+		var text = ''+input.value
+		if (!text.trim()) return;
+		form.reset()
+		sock.send(JSON.stringify({
+			method: 'AddItem',
+			isChecked: false,
+			listId,
+			text,
+		}))
+		return false
+	}
+
+	function onUpdateItem(itemId, isChecked) {
+		event.preventDefault()
+		sock.send(JSON.stringify({
+			method: 'UpdateItem',
+			isChecked: !!isChecked,
+			itemId,
+			listId,
+		}))
+		return false
+	}
+
+	function uuid(a,b){for(b=a='';a++<36;b+=a*51&52?(a^15?8^Math.random()*(a^20?16:4):4).toString(16):'-');return b}
+
+
+	function itemTpl(item) {
+		return `
+		<label class="todo" id="item-${item.itemId}">
+			<input class="todo__state" type="checkbox" id="check-${item.itemId}" ${item.isChecked ? 'checked' : ''} />
+
+			<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 25"
+				class="todo__icon">
+				<use xlink:href="#todo__line" class="todo__line"></use>
+				<use xlink:href="#todo__box" class="todo__box"></use>
+				<use xlink:href="#todo__check" class="todo__check"></use>
+				<use xlink:href="#todo__circle" class="todo__circle"></use>
+			</svg>
+
+			<div class="todo__text">${item.text}</div>
+
+		</label>`;
+	}
+</script>
+<html>
