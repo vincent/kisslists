@@ -205,10 +205,11 @@
 	var delay = 0
 	var timeout
 	var sock
+	var wsp = location.protocol === 'https:' ? 'wss' : 'ws'
 	;
 
 	function startWebsocket() {
-		sock = new WebSocket("ws://{{.Host}}/ws");
+		sock = new WebSocket(`${wsp}://${location.host}/ws`);
 
 		sock.onclose = function (event) {
 			document.body.style.opacity = .5
