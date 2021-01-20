@@ -14,13 +14,31 @@ on:
   pull_request:
 
 env:
-  # TODO: Change variable to your image's name.
-  IMAGE_NAME: image
+  IMAGE_NAME: allyouneedisgnu/sharedlists
 
 jobs:
   # Run tests.
   # See also https://docs.docker.com/docker-hub/builds/automated-testing/
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.15
+
+    - name: Build
+      run: go build -v ./...
+
+    - name: Test
+      run: go test -v ./...
+
   test:
+    # Ensure go test job passes before testing image.
+    needs: build
+
     runs-on: ubuntu-latest
 
     steps:
@@ -51,7 +69,7 @@ jobs:
         run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
