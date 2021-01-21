@@ -2,7 +2,7 @@
 <html>
 <style>
 	.todo-list {
-		background: #FFF;
+		background: {{.Theme.ItemBackground}};
 		font-size: 2em;
 		max-width: 50%;
 		margin: auto;
@@ -31,7 +31,7 @@
 	}
 
 	.todo__text {
-		color: #135156;
+		color: {{.Theme.ItemText}};
 		transition: all 0.4s linear 0.4s;
 	}
 
@@ -44,7 +44,7 @@
 		height: auto;
 		margin: auto;
 		fill: none;
-		stroke: #27FDC7;
+		stroke: {{.Theme.ItemCheck}};
 		stroke-width: 2;
 		stroke-linejoin: round;
 		stroke-linecap: round;
@@ -57,7 +57,7 @@
 	}
 
 	.todo__circle {
-		stroke: #27FDC7;
+		stroke: {{.Theme.ItemCheck}};
 		stroke-dasharray: 1 6;
 		stroke-width: 0;
 		transform-origin: 13.5px 12.5px;
@@ -101,7 +101,7 @@
 	}
 
 	.todo__check {
-		stroke: #447b7f;
+		stroke: {{.Theme.InputCheck}};
 		stroke-dasharray: 9.8995, 9.8995;
 		stroke-dashoffset: 9.8995;
 		transition-duration: 0.32s;
@@ -123,7 +123,7 @@
 
 	.todo__state:checked~.todo__text {
 		transition-delay: 0s;
-		color: #135156;
+		color: {{.Theme.InputChecked}};
 		opacity: 0.6;
 	}
 
@@ -147,12 +147,15 @@
 	}
 
 	.todo__write {
+		background: transparent;
+    	color: {{.Theme.ItemText}};
 		font-size: 1em;
 		border: none;
+		outline: none;
 	}
 
 	html {
-		background: #ddd;
+		background: {{.Theme.Background}};
 		height: 100%;
 		display: flex;
 		font-family: 'Helvetica';
@@ -163,18 +166,32 @@
 		width: 100%;
 		margin: auto;
 	}
+
+	#title {
+		text-align: center;
+	    color: {{.Theme.Title}};
+	}
+
+	@media (max-width: 1000px) {
+		html {
+			display: block;
+		}
+		.todo-list {
+			max-width: 100%;
+		}
+	}
 </style>
 
 <svg viewBox="0 0 0 0" style="position: absolute; z-index: -1; opacity: 0;">
 	<defs>
 		<linearGradient id="boxGradient" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="25" y2="25">
-			<stop offset="0%" stop-color="#27FDC7" />
-			<stop offset="100%" stop-color="#0FC0F5" />
+			<stop offset="0%" stop-color="{{.Theme.BoxGradientStart}}" />
+			<stop offset="100%" stop-color="{{.Theme.BoxGradientEnd}}" />
 		</linearGradient>
 
 		<linearGradient id="lineGradient">
-			<stop offset="0%" stop-color="#0FC0F5" />
-			<stop offset="100%" stop-color="#27FDC7" />
+			<stop offset="0%" stop-color="{{.Theme.LineGradientStart}}" />
+			<stop offset="100%" stop-color="{{.Theme.LineGradientEnd}}" />
 		</linearGradient>
 
 		<path id="todo__line" stroke="url(#lineGradient)" d="M21 12.3h168v0.1z"></path>
@@ -187,6 +204,7 @@
 
 
 <div class="todo-list">
+	<h1 id="title"></h1>
 	<label class="todo">
 		<form action="/api/create" method="POST" id="form" onsubmit="onAddItem()">
 			<input type="text" disabled class="todo__text todo__write" id="todo-write" placeholder="New item" />
@@ -197,6 +215,7 @@
 </div>
 
 <script>
+	var title = document.getElementById('title')
 	var input = document.getElementById('todo-write')
 	var form = document.getElementById('form')
 	var todoList = document.getElementById('todo-list')
@@ -226,14 +245,28 @@
 			try {
 				var data = [].concat(JSON.parse(event.data));
 				data.forEach(item => {
-					var exists = document.getElementById(`item-${item.itemId}`)
-					if (exists) {
-						document.getElementById(`item-${item.itemId}`).remove()
+
+					switch (item.method) {
+						case 'Ping':
+							console.log('connection openned')
+							input.removeAttribute('disabled')
+							document.body.style.opacity = 1
+							break;
+
+						case 'AddItem':
+							var exists = document.getElementById(`item-${item.itemId}`)
+							if (exists) {
+								document.getElementById(`item-${item.itemId}`).remove()
+							}
+							var node = document.createElement('div')
+							node.innerHTML = itemTpl(item)
+							setTimeout(registerChangeCallbackFn(node.firstElementChild, item), 1);
+							(item.isChecked ? doneList : todoList).prepend(node.firstElementChild)
+							break;
+
+						default: 
+							console.log('unhandled', item)
 					}
-					var node = document.createElement('div')
-					node.innerHTML = itemTpl(item)
-					setTimeout(registerChangeCallbackFn(node.firstElementChild, item), 1);
-					(item.isChecked ? doneList : todoList).prepend(node.firstElementChild)
 				})
 			} catch (e) {
 				console.error(e)
@@ -241,9 +274,7 @@
 		}
 
 		sock.onopen = function () {
-			console.log('connection openned')
-			input.removeAttribute('disabled')
-			document.body.style.opacity = 1
+			console.log('connection opened')
 			sock.send(JSON.stringify({
 				method: 'GetItems',
 				listId
@@ -252,7 +283,10 @@
 	}
 
 	if (!location.hash) location = `/#${uuid()}`
-	else startWebsocket()
+	else {
+		title.innerText = location.hash.slice(1)
+		startWebsocket()
+	}
 	window.addEventListener('offline', function(e) {
 		console.log('offline')
 		clearTimeout(timeout)

@@ -19,8 +19,8 @@ type Item struct {
 
 type Store interface {
 	Bootstrap()
-	GetItem(itemId int64) *Item
-	GetItems(listId string) []*Item
+	GetItem(itemID int64) *Item
+	GetItems(listID string) []*Item
 	AddItem(item *Item) *Item
 	UpdateItem(item *Item) *Item
 }
@@ -28,16 +28,6 @@ type Store interface {
 type SqliteStore struct {
 	DB *sql.DB
 }
-
-// // insert
-// insert, err := db.Prepare("INSERT INTO userinfo(username, departname, created) values(?,?,?)")
-// checkErr(err)
-
-// res, err := stmt.Exec("astaxie", "研发部门", "2012-12-09")
-// checkErr(err)
-
-// id, err := res.LastInsertId()
-// checkErr(err)
 
 func NewStore(dbfile string) Store {
 	db, err := sql.Open("sqlite3", dbfile)
@@ -65,21 +55,21 @@ func (store *SqliteStore) Bootstrap() {
 	}
 }
 
-func (store *SqliteStore) GetItem(itemId int64) *Item {
+func (store *SqliteStore) GetItem(itemID int64) *Item {
 	var items []*Item
 	ctx := context.Background()
-	err := sqlscan.Select(ctx, store.DB, &items, `SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE itemId = ?`, itemId)
+	err := sqlscan.Select(ctx, store.DB, &items, `SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE itemId = ?`, itemID)
 	if err != nil || len(items) != 1 {
-		log.Println("item not found:", itemId)
+		log.Println("item not found:", itemID)
 		return nil
 	}
 	return items[0]
 }
 
-func (store *SqliteStore) GetItems(listId string) []*Item {
+func (store *SqliteStore) GetItems(listID string) []*Item {
 	var items []*Item
 	ctx := context.Background()
-	err := sqlscan.Select(ctx, store.DB, &items, `SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE listId = ?`, listId)
+	err := sqlscan.Select(ctx, store.DB, &items, `SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE listId = ?`, listID)
 	if err != nil {
 		log.Println(err)
 	}

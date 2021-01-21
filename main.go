@@ -6,9 +6,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
-	"net/http"
 
 	"github.com/vincent/sharedlists/pkg"
 )
@@ -16,6 +13,7 @@ import (
 var (
 	dbfile   = flag.String("database", "./sharedlists.sqlite", "SQLite database file")
 	addr     = flag.String("port", ":80", "HTTP service address")
+	theme    = flag.String("theme", "default", "Theme")
 	filename string
 )
 
@@ -25,12 +23,5 @@ func main() {
 	store := pkg.NewStore(*dbfile)
 	store.Bootstrap()
 
-	wsh := pkg.NewWebSocketHandler(&store)
-
-	http.HandleFunc("/ws", wsh.ServeWebsocket)
-	http.HandleFunc("/", pkg.ServeHome)
-	fmt.Println("Listenning on http://localhost:" + *addr)
-	if err := http.ListenAndServe(*addr, nil); err != nil {
-		log.Fatal(err)
-	}
+	pkg.NewServer(addr, &store, *theme)
 }
