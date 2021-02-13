@@ -7,7 +7,7 @@ import (
 	"text/template"
 )
 
-var html, _ = ioutil.ReadFile("./pkg/frontend.html")
+var html, _ = ioutil.ReadFile("static/frontend.html")
 var frontend = string(html)
 var homeTempl = template.Must(template.New("").Parse(frontend))
 

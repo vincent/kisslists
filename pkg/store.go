@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"strconv"
 
 	// sqlite
 	"github.com/georgysavva/scany/sqlscan"
@@ -66,6 +67,16 @@ func (store *SqliteStore) GetItem(itemID int64) *Item {
 	return items[0]
 }
 
+func (store *SqliteStore) GetItemByText(listId int64, contentText string) *Item {
+	var items []*Item
+	ctx := context.Background()
+	err := sqlscan.Select(ctx, store.DB, &items, `SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE contentText = ?`, contentText)
+	if err != nil || len(items) != 1 {
+		return nil
+	}
+	return items[0]
+}
+
 func (store *SqliteStore) GetItems(listID string) []*Item {
 	var items []*Item
 	ctx := context.Background()
@@ -77,6 +88,13 @@ func (store *SqliteStore) GetItems(listID string) []*Item {
 }
 
 func (store *SqliteStore) AddItem(item *Item) *Item {
+	listID, _ := strconv.Atoi(item.ListID)
+	exists := store.GetItemByText(int64(listID), item.Text)
+	if exists != nil {
+		exists.IsChecked = item.IsChecked
+		exists = store.UpdateItem(exists)
+		return exists
+	}
 	stmt, err := store.DB.Prepare(`
 		INSERT INTO 
 			ListItems (listId, isChecked, contentText)
