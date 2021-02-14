@@ -8,6 +8,4 @@ WORKDIR /go/src/github.com/vincent/sharedlists
 
 RUN go install -v
 
-ENV THEME=""
-
-ENTRYPOINT sharedlists -database /sharedlists.sqlite -theme ${THEME:-default}
+ENTRYPOINT sharedlists -database /sharedlists.sqlite

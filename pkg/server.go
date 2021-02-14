@@ -23,7 +23,7 @@ type Server struct {
 	hub   hub
 }
 
-func NewServer(addr *string, store *Store, theme string) {
+func NewServer(addr *string, store *Store) {
 	globalCh := make(chan message)
 	globalQuit := make(chan struct{})
 	hub := NewHub(globalCh, globalQuit)
@@ -38,7 +38,7 @@ func NewServer(addr *string, store *Store, theme string) {
 	go updateCounterEvery(5*time.Second, globalCh)
 
 	http.HandleFunc("/ws", server.wsHandler(getWsUpgrader(), globalQuit, hub))
-	http.HandleFunc("/", ServeHome(theme))
+	http.HandleFunc("/", ServeHome())
 
 	server.Listen(addr)
 }

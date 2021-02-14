@@ -13,7 +13,6 @@ import (
 var (
 	dbfile   = flag.String("database", "./sharedlists.sqlite", "SQLite database file")
 	addr     = flag.String("port", ":80", "HTTP service address")
-	theme    = flag.String("theme", "default", "Theme")
 	filename string
 )
 
@@ -23,5 +22,5 @@ func main() {
 	store := pkg.NewStore(*dbfile)
 	store.Bootstrap()
 
-	pkg.NewServer(addr, &store, *theme)
+	pkg.NewServer(addr, &store)
 }

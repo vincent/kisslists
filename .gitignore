@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+__debug_bin
 
 # Database
 sharedlists.sqlite
