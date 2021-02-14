@@ -8,7 +8,7 @@ SharedLists is a dead simple shared lists server.
 - no import
 - .. just public lists
 
-![Screenshot](https://i.imgur.com/aVSNgGE.png)
+![Screenshot](https://i.imgur.com/hhyCr3b.png)
 
 ## Install with Docker compose
 
@@ -16,9 +16,7 @@ SharedLists is a dead simple shared lists server.
 sharedlists:
   image: allyouneedisgnu/sharedlists
   volumes:
-    - ./your/sharedlists.sqlite:/sharedlists.sqlite # an empty file will wo
-  environment:
-    THEME: "default" # original, ocean, nature, playful
+    - ./your/sharedlists.sqlite:/sharedlists.sqlite # an empty file will do
   ports:
     - 80:80
 ```
