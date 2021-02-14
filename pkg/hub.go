@@ -7,34 +7,28 @@ import (
 )
 
 type hub struct {
-	clients map[int]*client
+	clients map[int]*Client
 	// broadcast channel on which the hub will receiver messages
 	// and broadcast them all clients
-	broadcast chan message
-	// quit channel
-	quit chan struct{}
+	broadcast chan Message
 	// register channel on which the hub will register clients
-	register chan *client
+	register chan *Client
 	// deregister channel on which the hub will deregister clients
-	deregister chan *client
+	deregister chan *Client
 }
 
-func NewHub(ch chan message, quit chan struct{}) *hub {
+func NewHub(ch chan Message, quit chan struct{}) *hub {
 	return &hub{
-		clients:    make(map[int]*client),
-		register:   make(chan *client),
-		deregister: make(chan *client),
-		quit:       quit,
+		clients:    make(map[int]*Client),
+		register:   make(chan *Client),
+		deregister: make(chan *Client),
 		broadcast:  ch,
 	}
 }
 
-func (h *hub) start() {
+func (h *hub) Start() {
 	for {
 		select {
-		case <-h.quit:
-			log.Println("hub: global quit")
-			return
 		case message := <-h.broadcast:
 			for _, client := range h.clients {
 				client.send <- message
@@ -50,9 +44,9 @@ func (h *hub) start() {
 
 // read each message received on the client connection
 // and handle disconnect or route to the client recv channel
-func (h *hub) watchDisconnect(client *client) {
+func (h *hub) watchDisconnect(client *Client) {
 	for {
-		var msg message
+		var msg Message
 		err := client.conn.ReadJSON(&msg)
 		if err != nil {
 			if websocket.IsCloseError(err) {
@@ -66,31 +60,31 @@ func (h *hub) watchDisconnect(client *client) {
 	}
 }
 
-func (h *hub) Register(c *client) {
+func (h *hub) Register(c *Client) {
 	log.Printf("client %d connected.\n", c.id)
 	h.register <- c
 }
 
-func (h *hub) Deregister(c *client) {
+func (h *hub) Deregister(c *Client) {
 	log.Printf("client %d disconnected.\n", c.id)
 	h.deregister <- c
 }
 
-func (h *hub) push(client *client) {
+func (h *hub) push(client *Client) {
 	h.clients[client.id] = client
 }
 
-func (h *hub) delete(client *client) {
+func (h *hub) delete(client *Client) {
 	delete(h.clients, client.id)
 }
 
-func (h *hub) Iter(f func(*client)) {
+func (h *hub) Iter(f func(*Client)) {
 	for _, client := range h.clients {
 		f(client)
 	}
 }
 
-func (h *hub) sendToListClients(listID string, m message) {
+func (h *hub) sendToListClients(listID string, m Message) {
 	for _, client := range h.clients {
 		if client.listID == listID {
 			client.send <- m

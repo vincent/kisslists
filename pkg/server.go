@@ -4,27 +4,25 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
 
-type counter struct {
-	v int
-}
-
-type message struct {
+// Message holds any communication message.
+type Message struct {
 	Item
 	Method string `json:"method"`
 }
 
+// Server holds the server implementation.
 type Server struct {
 	store Store
 	hub   hub
 }
 
-func NewServer(addr *string, store *Store) {
-	globalCh := make(chan message)
+// NewServer returns a new server.
+func NewServer(store *Store) *Server {
+	globalCh := make(chan Message)
 	globalQuit := make(chan struct{})
 	hub := NewHub(globalCh, globalQuit)
 	defer close(globalQuit)
@@ -34,13 +32,16 @@ func NewServer(addr *string, store *Store) {
 		hub:   *hub,
 	}
 
-	go hub.start()
-	go updateCounterEvery(5*time.Second, globalCh)
+	// Start the clients hub, wait for any message.
+	go hub.Start()
 
+	// Listen on /ws to handle WebSocket messages.
 	http.HandleFunc("/ws", server.wsHandler(getWsUpgrader(), globalQuit, hub))
+
+	// Serve HTML on root url
 	http.HandleFunc("/", ServeHome())
 
-	server.Listen(addr)
+	return server
 }
 
 func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, globalQuit chan struct{}, hub *hub) http.HandlerFunc {
@@ -56,7 +57,7 @@ func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, globalQuit chan struc
 		go client.handle()
 
 		// when client receive a message, call the eventHandler
-		client.OnReceive(func(msg message) {
+		client.OnReceive(func(msg Message) {
 			go s.eventHandler(client, msg)
 		})
 
@@ -66,7 +67,7 @@ func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, globalQuit chan struc
 		// - handle disconnect
 		hub.Register(client)
 
-		client.send <- message{
+		client.send <- Message{
 			Method: "Ping",
 		}
 	}
@@ -74,7 +75,7 @@ func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, globalQuit chan struc
 
 // handle message reception by a client
 // use the store to answer each methods
-func (s *Server) eventHandler(c *client, msg message) {
+func (s *Server) eventHandler(c *Client, msg Message) {
 	// fmt.Printf("%+v : %+v\n", event, msg)
 
 	switch msg.Method {
@@ -82,7 +83,7 @@ func (s *Server) eventHandler(c *client, msg message) {
 		c.listID = msg.ListID
 		fmt.Println("client", c.id, "use list", msg.ListID)
 		for _, item := range s.store.GetItems(msg.ListID) {
-			s.hub.sendToListClients(msg.ListID, message{
+			s.hub.sendToListClients(msg.ListID, Message{
 				Method: "AddItem",
 				Item:   *item,
 			})
@@ -90,25 +91,16 @@ func (s *Server) eventHandler(c *client, msg message) {
 
 	case "AddItem":
 		item := s.store.AddItem(&msg.Item)
-		s.hub.sendToListClients(msg.ListID, message{
-			Method: "AddItem",
-			Item:   *item,
-		})
-
-	case "UpdateItem":
-		item := s.store.UpdateItem(&msg.Item)
-		s.hub.sendToListClients(msg.ListID, message{
+		s.hub.sendToListClients(msg.ListID, Message{
 			Method: "AddItem",
 			Item:   *item,
 		})
 	}
 }
 
-func (s *Server) Listen(addr *string) {
+func (s *Server) Listen(addr *string) error {
 	fmt.Println("Listenning on http://localhost:" + *addr)
-	if err := http.ListenAndServe(*addr, nil); err != nil {
-		log.Fatal(err)
-	}
+	return http.ListenAndServe(*addr, nil)
 }
 
 func getWsUpgrader() *websocket.Upgrader {
@@ -116,17 +108,5 @@ func getWsUpgrader() *websocket.Upgrader {
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin:     func(r *http.Request) bool { return true },
-	}
-}
-
-func updateCounterEvery(d time.Duration, globalCh chan message) {
-	ticker := time.NewTicker(d)
-	for {
-		select {
-		case <-ticker.C:
-			globalCh <- message{
-				Method: "Ping",
-			}
-		}
 	}
 }

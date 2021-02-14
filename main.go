@@ -6,6 +6,7 @@ package main
 
 import (
 	"flag"
+	"log"
 
 	"github.com/vincent/sharedlists/pkg"
 )
@@ -22,5 +23,8 @@ func main() {
 	store := pkg.NewStore(*dbfile)
 	store.Bootstrap()
 
-	pkg.NewServer(addr, &store)
+	server := pkg.NewServer(&store)
+	if err := server.Listen(addr); err != nil {
+		log.Fatal(err)
+	}
 }

@@ -6,39 +6,43 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var NextID int
+var nextID int
 
-type client struct {
+// Client stores a connected client.
+type Client struct {
 	id        int
 	listID    string
 	conn      *websocket.Conn
-	send      chan message
-	recv      chan message
+	send      chan Message
+	recv      chan Message
 	quit      chan struct{}
-	onReceive func(msg message)
+	onReceive func(msg Message)
 }
 
-func NewClient(conn *websocket.Conn) *client {
-	NextID++
-	return &client{
-		id:        NextID,
+// NewClient creates a new connected client.
+func NewClient(conn *websocket.Conn) *Client {
+	nextID++
+	return &Client{
+		id:        nextID,
 		conn:      conn,
 		quit:      make(chan struct{}),
-		send:      make(chan message),
-		recv:      make(chan message),
-		onReceive: func(msg message) {},
+		send:      make(chan Message),
+		recv:      make(chan Message),
+		onReceive: func(msg Message) {},
 	}
 }
 
-func (c *client) Close() {
+// Close the client connection.
+func (c *Client) Close() {
 	close(c.quit)
 }
 
-func (c *client) OnReceive(f func(msg message)) {
+// OnReceive define the receiving callback.
+func (c *Client) OnReceive(f func(msg Message)) {
 	c.onReceive = f
 }
 
-func (c *client) handle() {
+func (c *Client) handle() {
 	for {
 		select {
 		case <-c.quit:
@@ -56,15 +60,3 @@ func (c *client) handle() {
 		}
 	}
 }
-
-// func (c *client) listen() {
-// 	for {
-// 		var msg *message
-// 		err := c.conn.ReadJSON(&msg)
-// 		if err != nil {
-// 			fmt.Println("read:", err)
-// 			continue
-// 		}
-// 		c.recv <- *msg
-// 	}
-// }
