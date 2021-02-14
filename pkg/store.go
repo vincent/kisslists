@@ -21,10 +21,10 @@ type Item struct {
 // Sore is the storage backend
 type Store interface {
 	Bootstrap()
-	GetItem(itemID int64) *Item
-	GetItems(listID string) []*Item
-	AddItem(item *Item) *Item
-	updateItem(item *Item) *Item
+	Find(itemID int64) *Item
+	FindAll(listID string) []*Item
+	Create(item *Item) *Item
+	update(item *Item) *Item
 }
 
 // SqliteStore is the SQLite storge implementaion
@@ -61,8 +61,8 @@ func (store *SqliteStore) Bootstrap() {
 	}
 }
 
-// GetItem returns the item matching the given ID
-func (store *SqliteStore) GetItem(itemID int64) *Item {
+// Find returns the item matching the given ID
+func (store *SqliteStore) Find(itemID int64) *Item {
 	rows, _ := store.DB.Query(
 		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE itemId = ?`, itemID)
 	items, err := store.selectItems(rows)
@@ -75,8 +75,8 @@ func (store *SqliteStore) GetItem(itemID int64) *Item {
 	return items[0]
 }
 
-// GetItems returns all items matching the given list ID
-func (store *SqliteStore) GetItems(listID string) []*Item {
+// FindAll returns all items matching the given list ID
+func (store *SqliteStore) FindAll(listID string) []*Item {
 	rows, _ := store.DB.Query(
 		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE listId = ?`, listID)
 	items, err := store.selectItems(rows)
@@ -88,13 +88,13 @@ func (store *SqliteStore) GetItems(listID string) []*Item {
 	return items
 }
 
-// AddItem insert (or update) the given item.
-func (store *SqliteStore) AddItem(item *Item) *Item {
+// Create insert (or update) the given item.
+func (store *SqliteStore) Create(item *Item) *Item {
 	listID, _ := strconv.Atoi(item.ListID)
 	exists := store.getItemByText(int64(listID), item.Text)
 	if exists != nil {
 		exists.IsChecked = item.IsChecked
-		exists = store.updateItem(exists)
+		exists = store.update(exists)
 		return exists
 	}
 	stmt, err := store.DB.Prepare(`
@@ -107,22 +107,22 @@ func (store *SqliteStore) AddItem(item *Item) *Item {
 		log.Println(err)
 	}
 	id, err := res.LastInsertId()
-	return store.GetItem(id)
+	return store.Find(id)
 }
 
-func (store *SqliteStore) updateItem(item *Item) *Item {
+func (store *SqliteStore) update(item *Item) *Item {
 	stmt, err := store.DB.Prepare(`
 		UPDATE ListItems SET isChecked = ? WHERE itemId = ?`)
 	defer stmt.Close()
 	if _, err = stmt.Exec(item.IsChecked, item.ItemID); err != nil {
 		log.Println(err)
 	}
-	return store.GetItem(item.ItemID)
+	return store.Find(item.ItemID)
 }
 
-func (store *SqliteStore) getItemByText(listId int64, contentText string) *Item {
+func (store *SqliteStore) getItemByText(listID int64, contentText string) *Item {
 	rows, _ := store.DB.Query(
-		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE contentText = ?`, contentText)
+		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE listId = ? AND contentText = ?`, listID, contentText)
 	items, err := store.selectItems(rows)
 	defer rows.Close()
 	if err != nil || len(items) != 1 {

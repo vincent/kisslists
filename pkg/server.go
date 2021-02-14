@@ -82,7 +82,7 @@ func (s *Server) eventHandler(c *Client, msg Message) {
 	case "GetItems":
 		c.listID = msg.ListID
 		fmt.Println("client", c.id, "use list", msg.ListID)
-		for _, item := range s.store.GetItems(msg.ListID) {
+		for _, item := range s.store.FindAll(msg.ListID) {
 			s.hub.sendToListClients(msg.ListID, Message{
 				Method: "AddItem",
 				Item:   *item,
@@ -90,7 +90,7 @@ func (s *Server) eventHandler(c *Client, msg Message) {
 		}
 
 	case "AddItem":
-		item := s.store.AddItem(&msg.Item)
+		item := s.store.Create(&msg.Item)
 		if item == nil {
 			return
 		}
