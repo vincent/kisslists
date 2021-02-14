@@ -12,6 +12,8 @@ SharedLists is a dead simple shared lists server.
 
 ## Install with Docker compose
 
+Sharedlists image size is only 12 Mb.
+
 ```
 sharedlists:
   image: allyouneedisgnu/sharedlists
