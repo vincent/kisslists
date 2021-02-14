@@ -1,13 +1,12 @@
 package pkg
 
 import (
-	"context"
 	"database/sql"
 	"log"
 	"strconv"
 
 	// sqlite
-	"github.com/georgysavva/scany/sqlscan"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -64,10 +63,11 @@ func (store *SqliteStore) Bootstrap() {
 
 // GetItem returns the item matching the given ID
 func (store *SqliteStore) GetItem(itemID int64) *Item {
-	var items []*Item
-	ctx := context.Background()
-	err := sqlscan.Select(ctx, store.DB, &items,
+	rows, _ := store.DB.Query(
 		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE itemId = ?`, itemID)
+	items, err := store.selectItems(rows)
+	defer rows.Close()
+
 	if err != nil || len(items) != 1 {
 		log.Println("item not found:", itemID)
 		return nil
@@ -77,10 +77,11 @@ func (store *SqliteStore) GetItem(itemID int64) *Item {
 
 // GetItems returns all items matching the given list ID
 func (store *SqliteStore) GetItems(listID string) []*Item {
-	var items []*Item
-	ctx := context.Background()
-	err := sqlscan.Select(ctx, store.DB, &items,
+	rows, _ := store.DB.Query(
 		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE listId = ?`, listID)
+	items, err := store.selectItems(rows)
+	defer rows.Close()
+
 	if err != nil {
 		log.Println(err)
 	}
@@ -120,12 +121,37 @@ func (store *SqliteStore) updateItem(item *Item) *Item {
 }
 
 func (store *SqliteStore) getItemByText(listId int64, contentText string) *Item {
-	var items []*Item
-	ctx := context.Background()
-	err := sqlscan.Select(ctx, store.DB, &items,
+	rows, _ := store.DB.Query(
 		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE contentText = ?`, contentText)
+	items, err := store.selectItems(rows)
+	defer rows.Close()
 	if err != nil || len(items) != 1 {
 		return nil
 	}
 	return items[0]
+}
+
+func (store *SqliteStore) selectItems(rows *sql.Rows) ([]*Item, error) {
+	result := []*Item{}
+
+	var itemID int64
+	var listID string
+	var text string
+	var isChecked bool
+
+	for rows.Next() {
+		err := rows.Scan(&itemID, &listID, &isChecked, &text)
+		if err != nil {
+			return result, err
+		}
+
+		result = append(result, &Item{
+			ItemID:    itemID,
+			ListID:    listID,
+			Text:      text,
+			IsChecked: isChecked,
+		})
+	}
+
+	return result, nil
 }

@@ -73,6 +73,12 @@
 		stroke-linecap: round;
 	}
 
+	span.todo__icon {
+		font-size: 2em;
+		top: 10px;
+		left: 36px;
+	}
+
 	.todo__line,
 	.todo__box,
 	.todo__check {
@@ -173,6 +179,8 @@
 		font-size: 1em;
 		border: none;
 		outline: none;
+		display: block;
+	    width: 100%;
 	}
 
 	.todo__write::placeholder {
@@ -212,11 +220,14 @@
 		font-size: 1.5em;
 	    padding: 5px;
 		background: #202124 !important;
+		width: 40% !important;
+		line-height: 1.1em;
 	}
 
 	body .autocomplete > div {
 		padding: 20px 15px;
 	    font-size: 2em;
+		line-height: 1.1em;
 	}
 
 	body .autocomplete>div.selected,
@@ -270,14 +281,7 @@
 	</div>
 	<label class="todo">
 		<form action="/api/create" method="POST" id="form" autocomplete="false" onsubmit="onAddItem()">
-			<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 200 25"
-				class="todo__icon">
-				<use xlink:href="#todo__line" class="todo__line"></use>
-				<use xlink:href="#todo__box" class="todo__box"></use>
-				<use xlink:href="#todo__check" class="todo__check"></use>
-				<use xlink:href="#todo__circle" class="todo__circle"></use>
-			</svg>
-
+			<span class="todo__icon">+</span>
 			<input type="text" disabled class="todo__text todo__write" id="todo-write" placeholder="New item" autocomplete="off" />
 		</form>
 	</label>

@@ -91,6 +91,9 @@ func (s *Server) eventHandler(c *Client, msg Message) {
 
 	case "AddItem":
 		item := s.store.AddItem(&msg.Item)
+		if item == nil {
+			return
+		}
 		s.hub.sendToListClients(msg.ListID, Message{
 			Method: "AddItem",
 			Item:   *item,
