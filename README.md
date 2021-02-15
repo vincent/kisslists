@@ -16,7 +16,7 @@ KissLists is a dead simple shared lists server.
 
 ## Install with Docker compose
 
-kisslists image size is only 12 Mb.
+kisslists image size is only 20 Mb.
 
 ```
 kisslists:
