@@ -4,7 +4,7 @@
 
 SharedLists is a dead simple shared lists server.
 
-<img style="float:right;width:40%;" alt=""Screenshot src="https://i.imgur.com/hhyCr3b.png">
+<img align="right" width="40%" alt=""Screenshot src="https://i.imgur.com/hhyCr3b.png">
 
 - no user management
 - no security policies
