@@ -3,10 +3,8 @@ package pkg
 import (
 	"database/sql"
 	"log"
-	"strconv"
 
 	// sqlite
-
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -18,10 +16,10 @@ type Item struct {
 	IsChecked bool   `db:"isChecked"   json:"isChecked"`
 }
 
-// Sore is the storage backend
+// Store is the storage backend
 type Store interface {
 	Bootstrap()
-	Find(itemID int64) *Item
+	Find(listID string, itemID int64) *Item
 	FindAll(listID string) []*Item
 	Create(item *Item) *Item
 	update(item *Item) *Item
@@ -34,11 +32,7 @@ type SqliteStore struct {
 
 // NewStore return a new store.
 // call .Bootstrap() to create the necessary tables.
-func NewStore(dbfile string) Store {
-	db, err := sql.Open("sqlite3", dbfile)
-	if err != nil {
-		panic(err)
-	}
+func NewStore(db *sql.DB) Store {
 	return &SqliteStore{
 		DB: db,
 	}
@@ -62,14 +56,13 @@ func (store *SqliteStore) Bootstrap() {
 }
 
 // Find returns the item matching the given ID
-func (store *SqliteStore) Find(itemID int64) *Item {
+func (store *SqliteStore) Find(listID string, itemID int64) *Item {
 	rows, _ := store.DB.Query(
-		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE itemId = ?`, itemID)
+		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE listId = ? AND itemId = ?`, listID, itemID)
 	items, err := store.selectItems(rows)
 	defer rows.Close()
 
 	if err != nil || len(items) != 1 {
-		log.Println("item not found:", itemID)
 		return nil
 	}
 	return items[0]
@@ -79,20 +72,21 @@ func (store *SqliteStore) Find(itemID int64) *Item {
 func (store *SqliteStore) FindAll(listID string) []*Item {
 	rows, _ := store.DB.Query(
 		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE listId = ?`, listID)
-	items, err := store.selectItems(rows)
+	items, _ := store.selectItems(rows)
 	defer rows.Close()
-
-	if err != nil {
-		log.Println(err)
-	}
 	return items
 }
 
 // Create insert (or update) the given item.
 func (store *SqliteStore) Create(item *Item) *Item {
-	listID, _ := strconv.Atoi(item.ListID)
-	exists := store.getItemByText(int64(listID), item.Text)
+	var exists *Item
+	if item.ItemID > 0 {
+		exists = store.Find(item.ListID, item.ItemID)
+	} else {
+		exists = store.getItemByText(item.ListID, item.Text)
+	}
 	if exists != nil {
+		exists.Text = item.Text
 		exists.IsChecked = item.IsChecked
 		exists = store.update(exists)
 		return exists
@@ -107,7 +101,7 @@ func (store *SqliteStore) Create(item *Item) *Item {
 		log.Println(err)
 	}
 	id, err := res.LastInsertId()
-	return store.Find(id)
+	return store.Find(item.ListID, id)
 }
 
 func (store *SqliteStore) update(item *Item) *Item {
@@ -117,10 +111,10 @@ func (store *SqliteStore) update(item *Item) *Item {
 	if _, err = stmt.Exec(item.IsChecked, item.ItemID); err != nil {
 		log.Println(err)
 	}
-	return store.Find(item.ItemID)
+	return store.Find(item.ListID, item.ItemID)
 }
 
-func (store *SqliteStore) getItemByText(listID int64, contentText string) *Item {
+func (store *SqliteStore) getItemByText(listID string, contentText string) *Item {
 	rows, _ := store.DB.Query(
 		`SELECT itemId, listId, isChecked, contentText FROM ListItems WHERE listId = ? AND contentText = ?`, listID, contentText)
 	items, err := store.selectItems(rows)

@@ -10,7 +10,7 @@ var nextID int
 
 // Client stores a connected client.
 type Client struct {
-	id        int
+	ID        int
 	listID    string
 	conn      *websocket.Conn
 	send      chan Message
@@ -23,7 +23,7 @@ type Client struct {
 func NewClient(conn *websocket.Conn) *Client {
 	nextID++
 	return &Client{
-		id:        nextID,
+		ID:        nextID,
 		conn:      conn,
 		quit:      make(chan struct{}),
 		send:      make(chan Message),
@@ -42,12 +42,22 @@ func (c *Client) OnReceive(f func(msg Message)) {
 	c.onReceive = f
 }
 
-func (c *Client) handle() {
+// Receive should be called when the client receive a message.
+func (c *Client) Receive(msg Message) {
+	c.recv <- msg
+}
+
+// Send should be called when the client send a message.
+func (c *Client) Send(msg Message) {
+	c.send <- msg
+}
+
+func (c *Client) Handle() {
 	for {
 		select {
 		case <-c.quit:
 			if err := c.conn.Close(); err != nil {
-				log.Printf("client %d connection close error %v\n", c.id, err)
+				log.Printf("client %d connection close error %v\n", c.ID, err)
 			}
 			return
 		case n := <-c.send:

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"text/template"
 
 	"github.com/gorilla/websocket"
 )
@@ -17,15 +18,13 @@ type Message struct {
 // Server holds the server implementation.
 type Server struct {
 	store Store
-	hub   hub
+	hub   Hub
 }
 
 // NewServer returns a new server.
-func NewServer(store *Store) *Server {
+func NewServer(store *Store, homeTempl *template.Template) *Server {
 	globalCh := make(chan Message)
-	globalQuit := make(chan struct{})
-	hub := NewHub(globalCh, globalQuit)
-	defer close(globalQuit)
+	hub := NewHub(globalCh)
 
 	server := &Server{
 		store: *store,
@@ -36,15 +35,44 @@ func NewServer(store *Store) *Server {
 	go hub.Start()
 
 	// Listen on /ws to handle WebSocket messages.
-	http.HandleFunc("/ws", server.wsHandler(getWsUpgrader(), globalQuit, hub))
+	http.HandleFunc("/ws", server.wsHandler(getWsUpgrader(), hub))
 
 	// Serve HTML on root url
-	http.HandleFunc("/", ServeHome())
+	http.HandleFunc("/", server.home(homeTempl))
 
 	return server
 }
 
-func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, globalQuit chan struct{}, hub *hub) http.HandlerFunc {
+// Listen on given address
+func (s *Server) Listen(addr *string) error {
+	fmt.Println("Listenning on http://localhost:" + *addr)
+	return http.ListenAndServe(*addr, nil)
+}
+
+func (s *Server) home(homeTempl *template.Template) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+		if r.Method != "GET" {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		var v = struct {
+			Host string
+		}{
+			r.Host,
+		}
+		err := homeTempl.Execute(w, &v)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+}
+
+func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, hub *Hub) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		conn, err := wsupgrader.Upgrade(w, r, nil)
 		if err != nil {
@@ -54,7 +82,7 @@ func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, globalQuit chan struc
 		// new client instance
 		client := NewClient(conn)
 		// let the client handle quit/send/recv channels
-		go client.handle()
+		go client.Handle()
 
 		// when client receive a message, call the eventHandler
 		client.OnReceive(func(msg Message) {
@@ -78,10 +106,15 @@ func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, globalQuit chan struc
 func (s *Server) eventHandler(c *Client, msg Message) {
 	// fmt.Printf("%+v : %+v\n", event, msg)
 
+	if len(msg.Item.ListID) == 0 {
+		fmt.Println(msg.Method, "called without listID")
+		return
+	}
+
 	switch msg.Method {
 	case "GetItems":
 		c.listID = msg.ListID
-		fmt.Println("client", c.id, "use list", msg.ListID)
+		fmt.Println("client", c.ID, "use list", msg.ListID)
 		for _, item := range s.store.FindAll(msg.ListID) {
 			s.hub.sendToListClients(msg.ListID, Message{
 				Method: "AddItem",
@@ -89,6 +122,8 @@ func (s *Server) eventHandler(c *Client, msg Message) {
 			})
 		}
 
+	case "UpdateItem":
+		fallthrough
 	case "AddItem":
 		item := s.store.Create(&msg.Item)
 		if item == nil {
@@ -99,11 +134,6 @@ func (s *Server) eventHandler(c *Client, msg Message) {
 			Item:   *item,
 		})
 	}
-}
-
-func (s *Server) Listen(addr *string) error {
-	fmt.Println("Listenning on http://localhost:" + *addr)
-	return http.ListenAndServe(*addr, nil)
 }
 
 func getWsUpgrader() *websocket.Upgrader {

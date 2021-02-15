@@ -5,8 +5,11 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
+	"io/ioutil"
 	"log"
+	"text/template"
 
 	"github.com/vincent/sharedlists/pkg"
 )
@@ -20,10 +23,18 @@ var (
 func main() {
 	flag.Parse()
 
-	store := pkg.NewStore(*dbfile)
+	db, err := sql.Open("sqlite3", *dbfile)
+	if err != nil {
+		panic(err)
+	}
+
+	var html, _ = ioutil.ReadFile("static/frontend.html")
+	var homeTpl = template.Must(template.New("").Parse(string(html)))
+
+	store := pkg.NewStore(db)
 	store.Bootstrap()
 
-	server := pkg.NewServer(&store)
+	server := pkg.NewServer(&store, homeTpl)
 	if err := server.Listen(addr); err != nil {
 		log.Fatal(err)
 	}
