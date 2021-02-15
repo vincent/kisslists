@@ -24,5 +24,7 @@ jobs:
     - name: Test
       run: go test -v ./...
 
+    - name: Coverage Install
+      run: go get github.com/jpoles1/gopherbadger
     - name: Coverage
       run: gopherbadger
