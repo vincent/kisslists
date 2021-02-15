@@ -9,7 +9,6 @@ WORKDIR /go/src/github.com/vincent/kisslists
 RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags '-linkmode external -extldflags "-static"' .
 
 FROM alpine:latest
-VOLUME /kisslists
 
 WORKDIR /root/
 COPY --from=0 /go/src/github.com/vincent/kisslists .
