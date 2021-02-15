@@ -1,5 +1,7 @@
 # SharedLists
 
+![gopherbadger-tag-do-not-edit]()
+
 SharedLists is a dead simple shared lists server.
 
 - no user management
