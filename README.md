@@ -2,9 +2,9 @@
 
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-79%25-brightgreen.svg?longCache=true&style=flat)</a>
 
-SharedLists is a dead simple shared lists server.
-
 <img align="right" width="40%" src="https://i.imgur.com/hhyCr3b.png">
+
+SharedLists is a dead simple shared lists server.
 
 - no user management
 - no security policies
@@ -12,7 +12,7 @@ SharedLists is a dead simple shared lists server.
 - no import
 - .. just public lists
 
-<br><br><br><br><br><br>
+<br><br><br><br>
 
 ## Install with Docker compose
 
