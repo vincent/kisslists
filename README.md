@@ -31,7 +31,7 @@ kisslists image size is only 20 Mb.
 kisslists:
   image: allyouneedisgnu/kisslists
   volumes:
-    - ./your/kisslists.sqlite:/kisslists.sqlite # an empty file will do
+    - ./your/kisslists:/kisslists
   ports:
     - 80:80
 ```

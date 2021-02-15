@@ -7,8 +7,10 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"text/template"
 
 	"github.com/vincent/kisslists/pkg"
@@ -22,6 +24,10 @@ var (
 
 func main() {
 	flag.Parse()
+
+	if touch(*dbfile) != nil {
+		panic(fmt.Errorf("%v is not usable", *dbfile))
+	}
 
 	db, err := sql.Open("sqlite3", *dbfile)
 	if err != nil {
@@ -38,4 +44,12 @@ func main() {
 	if err := server.Listen(addr); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func touch(name string) error {
+	file, err := os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	return file.Close()
 }
