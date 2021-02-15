@@ -4,13 +4,15 @@
 
 SharedLists is a dead simple shared lists server.
 
-<img align="right" width="40%" src="//i.imgur.com/hhyCr3b.png">
+<img align="right" width="40%" src="https://i.imgur.com/hhyCr3b.png">
 
 - no user management
 - no security policies
 - no export
 - no import
 - .. just public lists
+
+<br><br><br><br><br><br>
 
 ## Install with Docker compose
 
