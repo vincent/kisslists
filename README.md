@@ -6,14 +6,18 @@
 
 KissLists is a dead simple shared lists server.
 
-- no user management
-- no import / export
-
 with
 
+- mobile optimised design
 - basic theme support
 - websockets messages
 - sqlite database
+
+but
+
+- no user management
+- no import / export
+
 
 <br><br>
 
