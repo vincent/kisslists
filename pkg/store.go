@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 
 	// sqlite
@@ -23,6 +24,7 @@ type Store interface {
 	FindAll(listID string) []*Item
 	Create(item *Item) *Item
 	update(item *Item) *Item
+	Delete(listID string, itemID int64) error
 }
 
 // SqliteStore is the SQLite storge implementaion
@@ -80,13 +82,15 @@ func (store *SqliteStore) FindAll(listID string) []*Item {
 // Create insert (or update) the given item.
 func (store *SqliteStore) Create(item *Item) *Item {
 	var exists *Item
+	if item.ItemID == 0 && len(item.Text) == 0 {
+		return nil
+	}
 	if item.ItemID > 0 {
 		exists = store.Find(item.ListID, item.ItemID)
 	} else {
 		exists = store.getItemByText(item.ListID, item.Text)
 	}
 	if exists != nil {
-		exists.Text = item.Text
 		exists.IsChecked = item.IsChecked
 		exists = store.update(exists)
 		return exists
@@ -102,6 +106,21 @@ func (store *SqliteStore) Create(item *Item) *Item {
 	}
 	id, err := res.LastInsertId()
 	return store.Find(item.ListID, id)
+}
+
+// Delete the given item
+func (store *SqliteStore) Delete(listID string, itemID int64) error {
+	exists := store.Find(listID, itemID)
+	if exists == nil {
+		return errors.New("No such item")
+	}
+	stmt, err := store.DB.Prepare(`
+		DELETE FROM ListItems WHERE itemId = ?`)
+	defer stmt.Close()
+	if _, err = stmt.Exec(itemID); err != nil {
+		log.Println(err)
+	}
+	return err
 }
 
 func (store *SqliteStore) update(item *Item) *Item {

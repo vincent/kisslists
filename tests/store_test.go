@@ -145,3 +145,26 @@ func TestSqliteStore_FindAll(t *testing.T) {
 	is.Equal(found[0].ItemID, id1)
 	is.Equal(found[1].ItemID, id2)
 }
+
+func TestSqliteStore_Delete(t *testing.T) {
+	// Arrange
+	is := is.New(t)
+	testdb := NewTestDB()
+	defer testdb.Dispose()
+
+	store := pkg.NewStore(testdb.db)
+	store.Bootstrap()
+
+	id := testdb.Insert(pkg.Item{
+		ListID:    "A list",
+		Text:      "Some text",
+		IsChecked: true,
+	})
+
+	// Act
+	_ = store.Delete("A list", id)
+	found := store.Find("A list", id)
+
+	// Assert
+	is.True(found == nil)
+}

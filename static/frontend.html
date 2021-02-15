@@ -43,6 +43,11 @@
 		border-bottom: solid 1px #ddd;
 	}
 
+	.todo_removed {
+		transition: 1s;
+		opacity: 0;
+	}
+
 	.todo:last-child {
 		border-bottom: none;
 	}
@@ -71,6 +76,7 @@
 		stroke-width: 1.5px;
 		stroke-linejoin: round;
 		stroke-linecap: round;
+		width: calc(100% - 2.8em); /* for delete btn */
 	}
 
 	span.todo__icon {
@@ -185,6 +191,12 @@
 
 	.todo__write::placeholder {
 		color: #afafaf;
+	}
+
+	.todo__delete {
+		float: right;
+		top: -1em;
+		position: relative;
 	}
 
 	#title {
@@ -362,6 +374,13 @@
 							document.body.style.opacity = 1
 							break;
 
+						case 'DeleteItem':
+							var exists = document.getElementById(`item-${item.itemId}`)
+							if (exists) {
+								document.getElementById(`item-${item.itemId}`).remove()
+							}
+							break;
+
 						case 'AddItem':
 							var exists = document.getElementById(`item-${item.itemId}`)
 							if (exists) {
@@ -370,10 +389,11 @@
 							var node = document.createElement('div')
 							node.innerHTML = itemTpl(item)
 							setTimeout(registerChangeCallbackFn(node.firstElementChild, item), 1);
+							setTimeout(registerDeleteCallbackFn(node.firstElementChild, item), 1);
 							(item.isChecked ? doneList : todoList).prepend(node.firstElementChild)
 							break;
 
-						default: 
+						default:
 							console.log('unhandled', item)
 					}
 				})
@@ -445,7 +465,14 @@
 
 	function registerChangeCallbackFn(node, item) {
 		return _ => node.querySelector('input').addEventListener('change', event => {
-			onUpdateItem(+event.target.id.replace('check-', ''), event.target.checked)
+			return onUpdateItem(event, item.itemId, event.target.checked)
+		})
+	}
+
+	function registerDeleteCallbackFn(node, item) {
+		return _ => node.querySelector('.todo__delete').addEventListener('click', event => {
+			node.classList.add('todo_removed')
+			return onDeleteItem(event, item.itemId, event.target.checked)
 		})
 	}
 
@@ -463,12 +490,24 @@
 		return false
 	}
 
-	function onUpdateItem(itemId, isChecked) {
+	function onUpdateItem(event, itemId, isChecked) {
 		event.preventDefault()
 		setTimeout(_ => {
 			sock.send(JSON.stringify({
 				method: 'UpdateItem',
 				isChecked: !!isChecked,
+				itemId,
+				listId,
+			}))
+		}, 400)
+		return false
+	}
+
+	function onDeleteItem(event, itemId) {
+		event.preventDefault()
+		setTimeout(_ => {
+			sock.send(JSON.stringify({
+				method: 'DeleteItem',
 				itemId,
 				listId,
 			}))
@@ -506,6 +545,7 @@
 
 			<div class="todo__text">${item.text}</div>
 
+			<div class="todo__delete">⌦</div>
 		</label>`;
 	}
 

@@ -2,9 +2,10 @@
 
 <a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-79%25-brightgreen.svg?longCache=true&style=flat)</a>
 
-<img align="right" width="40%" src="https://i.imgur.com/EXNsN7s.png">
+KissLists is a very simple shared lists server.
+<br><br>
 
-KissLists is a dead simple shared lists server.
+<img align="right" width="40%" src="https://i.imgur.com/EXNsN7s.png">
 
 with
 
@@ -15,11 +16,12 @@ with
 
 but
 
+- no built-in authentication 
 - no user management
+- no admin panel
 - no import / export
 
-
-<br><br>
+<br>
 
 ## Install with Docker compose
 

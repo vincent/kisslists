@@ -133,6 +133,16 @@ func (s *Server) eventHandler(c *Client, msg Message) {
 			Method: "AddItem",
 			Item:   *item,
 		})
+
+	case "DeleteItem":
+		err := s.store.Delete(msg.ListID, msg.ItemID)
+		if err != nil {
+			return
+		}
+		s.hub.sendToListClients(msg.ListID, Message{
+			Method: "DeleteItem",
+			Item:   msg.Item,
+		})
 	}
 }
 
