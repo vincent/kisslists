@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/matryer/is"
-	"github.com/vincent/sharedlists/pkg"
+	"github.com/vincent/kisslists/pkg"
 )
 
 func TestHub_Iter(t *testing.T) {

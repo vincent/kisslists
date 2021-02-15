@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-	"github.com/vincent/sharedlists/pkg"
+	"github.com/vincent/kisslists/pkg"
 )
 
 func TestSqliteStore_Bootstrap(t *testing.T) {

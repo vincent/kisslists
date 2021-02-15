@@ -1,4 +1,4 @@
-module github.com/vincent/sharedlists
+module github.com/vincent/kisslists
 
 go 1.14
 

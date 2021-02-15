@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/matryer/is"
-	"github.com/vincent/sharedlists/pkg"
+	"github.com/vincent/kisslists/pkg"
 )
 
 func TestClient_NewClient(t *testing.T) {

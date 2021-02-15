@@ -7,7 +7,7 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/vincent/sharedlists/pkg"
+	"github.com/vincent/kisslists/pkg"
 )
 
 type testDB struct {

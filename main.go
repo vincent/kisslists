@@ -11,11 +11,11 @@ import (
 	"log"
 	"text/template"
 
-	"github.com/vincent/sharedlists/pkg"
+	"github.com/vincent/kisslists/pkg"
 )
 
 var (
-	dbfile   = flag.String("database", "./sharedlists.sqlite", "SQLite database file")
+	dbfile   = flag.String("database", "./kisslists.sqlite", "SQLite database file")
 	addr     = flag.String("port", ":80", "HTTP service address")
 	filename string
 )
