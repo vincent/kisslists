@@ -43,6 +43,10 @@
 		border-bottom: solid 1px #ddd;
 	}
 
+	#done-list .todo {
+		border: none;
+	}
+
 	.todo_removed {
 		transition: 1s;
 		opacity: 0;
@@ -528,7 +532,7 @@
 		localStorage.setItem('theme', color)
 	}
 
-	function uuid(a,b){for(b=a='';a++<36;b+=a*51&52?(a^15?8^Math.random()*(a^20?16:4):4).toString(16):'-');return b}
+	function uuid(a,b){for(b=a='';a++<8;b+=a*51&52?(a^15?8^Math.random()*(a^20?16:4):4).toString(16):'-');return b}
 
 	function itemTpl(item) {
 		return `
