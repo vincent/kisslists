@@ -6,6 +6,8 @@
 *.dylib
 __debug_bin
 vendor
+dist
+generated_*.go
 
 # Database
 kisslists.sqlite

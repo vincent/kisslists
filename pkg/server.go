@@ -45,28 +45,14 @@ func NewServer(store *Store, homeTempl *template.Template) *Server {
 
 // Listen on given address
 func (s *Server) Listen(addr *string) error {
-	fmt.Println("Listenning on http://localhost:" + *addr)
+	fmt.Println("Listenning on http://0.0.0.0" + *addr)
 	return http.ListenAndServe(*addr, nil)
 }
 
 func (s *Server) home(homeTempl *template.Template) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/" {
-			http.Error(w, "Not found", http.StatusNotFound)
-			return
-		}
-		if r.Method != "GET" {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		var v = struct {
-			Host string
-		}{
-			r.Host,
-		}
-		err := homeTempl.Execute(w, &v)
-		if err != nil {
+		if err := homeTempl.Execute(w, nil); err != nil {
 			log.Println(err)
 		}
 	}
@@ -81,6 +67,7 @@ func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, hub *Hub) http.Handle
 
 		// new client instance
 		client := NewClient(conn)
+
 		// let the client handle quit/send/recv channels
 		go client.Handle()
 
@@ -111,6 +98,7 @@ func (s *Server) eventHandler(c *Client, msg Message) {
 		return
 	}
 
+	// Handle message action
 	switch msg.Method {
 	case "GetItems":
 		c.listID = msg.ListID

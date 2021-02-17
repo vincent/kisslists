@@ -1,0 +1,256 @@
+html, html * {
+    color: #efefef;
+}
+
+html {
+    background: #202124;
+}
+
+/*************************/
+
+html {
+    height: 100%;
+    display: flex;
+    font-family: 'Helvetica';
+}
+
+body {
+    opacity: 0.5;
+    width: 100%;
+    margin: auto;
+}
+
+.todo-list {
+    font-size: 2em;
+    max-width: 50%;
+    margin: auto;
+    padding: 0.5em 1em;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+}
+
+.todo {
+    display: block;
+    position: relative;
+    padding: 1em 1em 1em 16%;
+    margin: 0 auto;
+    cursor: pointer;
+    border-bottom: solid 1px #ddd;
+}
+
+#done-list .todo {
+    border: none;
+}
+
+.todo_removed {
+    transition: 1s;
+    opacity: 0;
+}
+
+.todo:last-child {
+    border-bottom: none;
+}
+
+.todo__state {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+}
+
+.todo__text {
+    transition: all 0.4s linear 0.4s;
+}
+
+.todo__icon {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    margin: auto;
+    fill: none;
+    stroke: #efefef;
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    width: calc(100% - 2.8em); /* for delete btn */
+}
+
+span.todo__icon {
+    font-size: 2em;
+    top: 10px;
+    left: 36px;
+}
+
+.todo__line,
+.todo__box,
+.todo__check {
+    transition: stroke-dashoffset 0.2s cubic-bezier(0.9, 0, 0.5, 1);
+}
+
+.todo__circle {
+    stroke: #efefef;
+    stroke-dasharray: 1 6;
+    stroke-width: 0;
+    transform-origin: 13.5px 12.5px;
+    transform: scale(0.4) rotate(0deg);
+    -webkit-animation: none 0.2s linear;
+    animation: none 0.2s linear;
+}
+
+@-webkit-keyframes explode {
+    30% {
+        stroke-width: 3;
+        stroke-opacity: 1;
+        transform: scale(0.8) rotate(40deg);
+    }
+
+    100% {
+        stroke-width: 0;
+        stroke-opacity: 0;
+        transform: scale(1.1) rotate(60deg);
+    }
+}
+
+@keyframes explode {
+    30% {
+        stroke-width: 3;
+        stroke-opacity: 1;
+        transform: scale(0.8) rotate(40deg);
+    }
+
+    100% {
+        stroke-width: 0;
+        stroke-opacity: 0;
+        transform: scale(1.1) rotate(60deg);
+    }
+}
+
+.todo__box {
+    stroke-dasharray: 56.1053, 56.1053;
+    stroke-dashoffset: 0;
+    transition-delay: 0.16s;
+}
+
+.todo__check {
+    stroke: #efefef;
+    stroke-dasharray: 9.8995, 9.8995;
+    stroke-dashoffset: 9.8995;
+    transition-duration: 0.32s;
+}
+
+.todo__line {
+    stroke-dasharray: 168, 1684;
+    stroke-dashoffset: 168;
+    stroke-width: 1px;
+    opacity: .6;
+}
+
+.todo__circle {
+    -webkit-animation-delay: 0.26s;
+    animation-delay: 0.26s;
+    -webkit-animation-duration: 0.26s;
+    animation-duration: 0.26s;
+}
+
+.todo__state:checked~.todo__text {
+    transition-delay: 0s;
+    opacity: 0.6;
+}
+
+.todo__state:checked~.todo__icon .todo__box {
+    stroke-dashoffset: 56.1053;
+    transition-delay: 0s;
+}
+
+.todo__state:checked~.todo__icon .todo__line {
+    stroke-dashoffset: -8;
+}
+
+.todo__state:checked~.todo__icon .todo__check {
+    stroke-dashoffset: 0;
+    transition-delay: 0.48s;
+}
+
+.todo__state:checked~.todo__icon .todo__circle {
+    -webkit-animation-name: explode;
+    animation-name: explode;
+}
+
+.todo__write {
+    background: transparent;
+    font-size: 1em;
+    border: none;
+    outline: none;
+    display: block;
+    width: 100%;
+}
+
+.todo__write::placeholder {
+    color: #afafaf;
+}
+
+.todo__delete {
+    float: right;
+    top: -1em;
+    position: relative;
+}
+
+#title {
+    text-align: center;
+}
+
+#todo__action__bar {
+    text-align: right;
+}
+
+#todo__action__bar button {
+    background: inherit;
+    font-size: 2em;
+    border: none;
+    outline: none;
+    cursor: pointer;
+}
+
+#todo__action__bar .todo__action__color {
+    display: none;
+}
+#todo__action__bar .todo__action__color button {
+    width: 1.5em;
+    height: 1.5em;
+    margin-top: 1em;
+    margin-bottom: 3em;
+    border-radius: 50%;
+    border: 1px solid #555;
+}
+
+body .autocomplete {
+    border-radius: 4px;
+    font-size: 1.5em;
+    padding: 5px;
+    background: #202124 !important;
+    width: 40% !important;
+    line-height: 1.1em;
+}
+
+body .autocomplete > div {
+    padding: 20px 15px;
+    font-size: 2em;
+    line-height: 1.1em;
+}
+
+body .autocomplete>div.selected,
+body .autocomplete>div:hover:not(.group) {
+    background: inherit;
+    cursor: pointer;
+}
+
+@media (max-width: 1000px) {
+    html {
+        display: block;
+    }
+    .todo-list {
+        max-width: 100%;
+    }
+}
