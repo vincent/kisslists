@@ -23,9 +23,11 @@ but
 
 <br>
 
-## Install with Docker compose
+## Install
 
-kisslists image size is only 20 Mb.
+### with Docker compose
+
+> available tags for linux amd64 and arm <br>
 
 ```
 kisslists:
