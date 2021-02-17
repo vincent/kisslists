@@ -5,6 +5,7 @@
 *.so
 *.dylib
 __debug_bin
+vendor
 
 # Database
 kisslists.sqlite
