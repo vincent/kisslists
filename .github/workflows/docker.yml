@@ -1,6 +1,8 @@
 name: Docker
 
 on:
+  schedule:
+    - cron: '0 1 * * *'
   push:
     # Publish `v1.2.3` tags as releases.
     tags:
@@ -23,10 +25,11 @@ jobs:
           DOCKER_VERSION=dev
           if [ "${{ github.event_name }}" = "schedule" ]; then
             DOCKER_VERSION=nightly
+            TAGS="${DOCKER_IMAGE}:${DOCKER_VERSION}"
           elif [[ $GITHUB_REF == refs/tags/* ]]; then
             DOCKER_VERSION=${GITHUB_REF#refs/tags/}
+            TAGS="${DOCKER_IMAGE}:${DOCKER_VERSION},${DOCKER_IMAGE}:latest"
           fi
-          TAGS="${DOCKER_IMAGE}:${DOCKER_VERSION}"
           echo ::set-output name=tags::${TAGS}
 
       - name: Set up QEMU
