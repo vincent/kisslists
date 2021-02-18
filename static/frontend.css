@@ -80,7 +80,7 @@ body {
 span.todo__icon {
     font-size: 2em;
     top: 10px;
-    left: 36px;
+    padding-left: 3%;
 }
 
 .todo__line,
@@ -192,9 +192,14 @@ span.todo__icon {
 }
 
 .todo__delete {
+    color: #666;
     float: right;
-    top: -1em;
+    top: -1.25em;
     position: relative;
+}
+.todo__delete:focus,
+.todo__delete:hover {
+    color: #eee;
 }
 
 #title {
