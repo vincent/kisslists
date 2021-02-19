@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="themed">
 <style>{{include "/autocomplete.min.css"}}</style>
 <style>{{include "/frontend.css"}}</style>
 
@@ -23,27 +23,29 @@
 	</defs>
 </svg>
 
-<div class="todo-list">
-	<h1 id="title"></h1>
-	<div id="todo__action__bar">
-		<button type="button">☰</button>
-		<div class="todo__action__color">
-			<button type="button" style="background:tan"></button>
-			<button type="button" style="background: lightseagreen;"></button>
-			<button type="button" style="background: mediumpurple;"></button>
-			<button type="button" style="background:slategray"></button>
-			<button type="button" style="background:darkslategrey"></button>
+<section class="todo-list">
+	<section class="header themed padded">
+		<h1 id="title"></h1>
+		<div id="todo__action__bar">
+			<button type="button">☰</button>
+			<div class="todo__action__color">
+				<button type="button" style="background:tan"></button>
+				<button type="button" style="background: lightseagreen;"></button>
+				<button type="button" style="background: mediumpurple;"></button>
+				<button type="button" style="background:slategray"></button>
+				<button type="button" style="background:darkslategrey"></button>
+			</div>
 		</div>
-	</div>
-	<label class="todo">
-		<form action="/api/create" method="POST" id="form" autocomplete="false">
-			<span class="todo__icon">+</span>
-			<input type="text" disabled class="todo__text todo__write" id="todo-write" placeholder="New item" autocomplete="off" />
-		</form>
-	</label>
-	<div id="todo-list"></div>
-	<div id="done-list"></div>
-</div>
+		<label class="todo todo__form">
+			<form action="/api/create" method="POST" id="form" autocomplete="false">
+				<span class="todo__icon">+</span>
+				<input type="text" disabled class="todo__text todo__write" id="todo-write" placeholder="New item" autocomplete="off" />
+			</form>
+		</label>
+	</section>
+	<div id="todo-list" class="padded"></div>
+	<div id="done-list" class="padded"></div>
+</section>
 
 <script>{{include "/autocomplete.min.js"}}</script>
 <script>{{include "/frontend.js"}}</script>

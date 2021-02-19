@@ -43,7 +43,7 @@
             })
             // Change theme buttons
             $$('.todo__action__color button').forEach(el => {
-                el.addEventListener('click', evt => onChangeTheme(evt.target.style.backgroundColor))
+                el.addEventListener('click', evt => this.onChangeTheme(evt.target.style.backgroundColor))
             })
             
             // Title event handlers
@@ -113,7 +113,7 @@
     
         // Change theme callback
         onChangeTheme(color) {
-            this.html.style.backgroundColor = color
+            $$('.themed').forEach(el => el.style.backgroundColor = color);
             localStorage.setItem('theme', color)
         },
     
@@ -253,7 +253,7 @@
     
             this.sock = null;
             this.delay = (this.delay > 10*1000) ? this.delay : (this.delay + 200)
-            this.timeout = setTimeout(startWebsocket, this.delay)
+            this.timeout = setTimeout(this.startWebsocket.bind(this), this.delay)
         },
     
         onMessage(event) {
@@ -353,7 +353,7 @@
 
     // Theme
     var color = localStorage.getItem('theme')
-    if (color) UI.html.style.backgroundColor = color;
+    if (color) UI.onChangeTheme(color)
 
     // List title
     var customTitle = localStorage.getItem(UI.listId)
