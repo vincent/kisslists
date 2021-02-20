@@ -25,6 +25,7 @@ type Store interface {
 	Create(item *Item) *Item
 	update(item *Item) *Item
 	Delete(listID string, itemID int64) error
+	AllLists() []*Item
 }
 
 // SqliteStore is the SQLite storge implementaion
@@ -167,4 +168,19 @@ func (store *SqliteStore) selectItems(rows *sql.Rows) ([]*Item, error) {
 	}
 
 	return result, nil
+}
+
+func (store *SqliteStore) AllLists() []*Item {
+	rows, _ := store.DB.Query("SELECT DISTINCT listId FROM ListItems")
+	var lists []*Item
+	var listID string
+	for rows.Next() {
+		err := rows.Scan(&listID)
+		if err != nil {
+			return nil
+		}
+		lists = append(lists, &Item{ListID: listID})
+	}
+
+	return lists
 }
