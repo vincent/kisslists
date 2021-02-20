@@ -20,6 +20,10 @@ body {
     margin: auto;
 }
 
+.hidden {
+    display: none;
+}
+
 .todo-list {
     font-size: 2em;
     max-width: 50%;

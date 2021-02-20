@@ -20,6 +20,8 @@
         doneList: $('#done-list'),
         colorsBar: $('.todo__action__color'),
         actionsBtn: $('#todo__action__bar > button'),
+        listSection: $('#list-section'),
+        todoSection: $('#todo-section'),
     
         // temporary containers
         shadowTodo: document.createElement('div'),
@@ -86,6 +88,16 @@
         disable() {
             document.body.style.opacity = .5
             this.input.setAttribute('disabled', true)
+        },
+
+        // Hide the element passed
+        hide(element) {
+            element.classList.add("hidden");
+        },
+
+        // Show the element passed
+        show(element) {
+            element.classList.remove("hidden");
         },
 
         // Add a Update listener on this node
@@ -376,12 +388,17 @@
         // no hash, show a list of existing lists as well as link to create new
         const newListElem = document.querySelector("#new-list")
         newListElem.href = `/#${uuid()}:New List`;
+        UI.hide(UI.todoSection)
+        UI.show(UI.listSection)
 
         UI.init(WS)
         WS.init(UI)
         WS.fetchLists()
     } else {
         // app bootstrap
+        UI.hide(UI.listSection)
+        UI.show(UI.todoSection)
+
         hashAndTitle = location.hash.split(':')
         UI.title.innerText = decodeURIComponent(hashAndTitle[1] ? hashAndTitle[1] : hashAndTitle[0])
         UI.listId = hashAndTitle[0]
