@@ -167,6 +167,10 @@
         onListReceived(list) {
             switch (list.method) {
                 case "AddList":
+                    var exists = $(`#list-${list.listId.substr(1)}`)
+                    if (exists) {
+                        exists.remove();
+                    }
                     let node = document.createElement('div')
                     node.innerHTML = this.listTemplate(list)
                     const listNode = document.querySelector("#todolist-list")
@@ -236,7 +240,7 @@
         listTemplate({ listId }) {
             const name = localStorage.getItem(listId);
             const linkText = !name || name === "" ? listId : `${name} (${listId})`
-            return `<li><a href="/${listId}">${linkText}</a></li>`
+            return `<li id="list-${listId.substr(1)}"><a href="/${listId}">${linkText}</a></li>`
         },
     
         redrawFavicon(color, letter) {
@@ -309,10 +313,14 @@
     
         onOpen() {
             console.log('connection opened')
-            this.sock.send(JSON.stringify({
-                method: 'GetItems',
-                listId: this.ui.listId,
-            }))
+            if (!location.hash) {
+                WS.fetchLists()
+            } else {
+                this.sock.send(JSON.stringify({
+                    method: 'GetItems',
+                    listId: this.ui.listId,
+                }))
+            }
         },
     
         connect() {
