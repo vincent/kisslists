@@ -15,7 +15,8 @@ It is a ultra-minimalistic alternative of Google Keep todo lists.
 
 ## Screenshots
 
-<video autoplay style="width:27%"><source src="/kisslists/img/capture.mp4"></video>
+<a href="/kisslists/img/capture.mp4">demo</a>
+
 ![Screenshot](/kisslists/img/QfRBCgk.png)
 ![Screenshot](/kisslists/img/6I5qR5J.png)
 
