@@ -3,7 +3,7 @@ name: github pages
 # Controls when the action will run. 
 on:
   push:
-    branches: [ gh-pages ]
+    branches: [ gh-hugo ]
 
 jobs:
   deploy:
