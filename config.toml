@@ -1,3 +1,4 @@
+baseURL = "https://vincent.github.io/kisslists/"
 languageCode = "en-us"
 title = "KISS Lists"
 theme = "m10c"
