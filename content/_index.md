@@ -15,8 +15,8 @@ It is a ultra-minimalistic alternative of Google Keep todo lists.
 
 ## Screenshots
 
-<img style="height:400px;display:inline" src="QfRBCgk.png">
-<img style="height:400px;display:inline" src="6I5qR5J.png">
+![Screenshot](/static/img/QfRBCgk.png)
+![Screenshot](/static/img/6I5qR5J.png)
 
 ## Install with Docker
 
