@@ -186,14 +186,15 @@ span.todo__icon {
 }
 
 .todo__delete {
-    color: #666;
+    stroke: #666;
+    padding: 5px;
     float: right;
     top: -1.25em;
     position: relative;
 }
 .todo__delete:focus,
 .todo__delete:hover {
-    color: #eee;
+    stroke: #eee;
 }
 
 .header  {
