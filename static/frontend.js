@@ -28,6 +28,9 @@
         init(ws) {
             this.ws = ws;
 
+            // Reload page on navigation
+            window.addEventListener('popstate', () => location.reload())
+
             // Actions bar event handlers
 
             // Toggle the menu when press the nemu button
