@@ -1,0 +1,20 @@
+languageCode = "en-us"
+title = "KISS Lists"
+theme = "m10c"
+
+[menu]
+  [[menu.main]]
+
+[params]
+  author = "Vincent Lark"
+  description = "Most simple shared lists server"
+  menu_item_separator = " - "
+  [[params.social]]
+    name = "github"
+    url = "https://github.com/vincent/kisslists"
+  [[params.social]]
+    name = "docker"
+    url = "https://hub.docker.com/repository/docker/allyouneedisgnu/kisslists"
+  [[params.social]]
+    name = "coffee"
+    url = "https://www.buymeacoffee.com/allyouneedisgnu"
