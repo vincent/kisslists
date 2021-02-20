@@ -149,6 +149,17 @@
             }
         },
 
+        onListReceived(list) {
+            switch (list.method) {
+                case "AddList":
+                    let node = document.createElement('div')
+                    node.innerHTML = this.listTemplate(list)
+                    const listNode = document.querySelector("#todolist-list")
+                    listNode.appendChild(node)
+                    break;
+            }
+        },
+
         commitItemReceived() {
             this.doneList.prepend.apply(this.doneList, this.shadowDone.children)
             this.todoList.prepend.apply(this.todoList, this.shadowTodo.children)
@@ -206,6 +217,12 @@
                 </svg>
             </label>`;
         },
+
+        listTemplate({ listId }) {
+            const name = localStorage.getItem(listId);
+            const linkText = !name || name === "" ? listId : `${name} (${listId})`
+            return `<li><a href="/${listId}">${linkText}</a></li>`
+        },
     
         redrawFavicon(color, letter) {
             var canvas = document.createElement('canvas');
@@ -262,8 +279,14 @@
         onMessage(event) {
             try {
                 var data = [].concat(JSON.parse(event.data));
-                data.forEach(item => this.ui.onItemReceived(item))
-                this.ui.commitItemReceived();
+                data.forEach(val => {
+                    if (val.method === "AddList") {
+                        this.ui.onListReceived(val)
+                        return
+                    }
+                    this.ui.onItemReceived(val)
+                    this.ui.commitItemReceived();
+                })
             } catch (e) {
                 console.error(e)
             }
@@ -336,14 +359,24 @@
             }, 400)
             return false
         },
+        fetchLists() {
+            setTimeout(() => {
+                this.sock.send(JSON.stringify({
+                    method: 'GetLists',
+                }))
+            }, 400)
+        }
     }
     
     // UI & transport
     if (!location.hash) {
-        // no hash, set a random one and reload
-        location.hash = UI.listId = `#${uuid()}:New List`;
-        location.reload()
+        // no hash, show a list of existing lists as well as link to create new
+        const newListElem = document.querySelector("#new-list")
+        newListElem.href = `/#${uuid()}:New List`;
 
+        UI.init(WS)
+        WS.init(UI)
+        WS.fetchLists()
     } else {
         // app bootstrap
         hashAndTitle = location.hash.split(':')
