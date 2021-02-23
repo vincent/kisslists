@@ -23,8 +23,17 @@
 	</defs>
 </svg>
 
-<section class="todo-list">
+<section id="list-section" class="todo-list padded">
+	<div class="header themed padded">
+		<h2>All lists</h2>
+		<a id="new-list">➕ Create a new list</a>
+	</div>
+	<ul id="todolist-list"></ul>
+</section>
+    
+<section id="todo-section" class="todo-list">
 	<section class="header themed padded">
+		<a id="back-arrow" href="/">❮</a>
 		<h1 id="title"></h1>
 		<div id="todo__action__bar">
 			<button type="button">☰</button>

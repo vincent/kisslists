@@ -168,3 +168,65 @@ func TestSqliteStore_Delete(t *testing.T) {
 	// Assert
 	is.True(found == nil)
 }
+
+func TestSqliteStore_AllLists_Empty(t *testing.T) {
+	// Arrange
+	is := is.New(t)
+	testdb := NewTestDB()
+	defer testdb.Dispose()
+
+	store := pkg.NewStore(testdb.db)
+	store.Bootstrap()
+
+	// Act
+	lists := store.AllLists()
+
+	// Assert
+	is.Equal(len(lists), 0)
+}
+
+func TestSqliteStore_AllLists(t *testing.T) {
+	// Arrange
+	is := is.New(t)
+	testdb := NewTestDB()
+	defer testdb.Dispose()
+
+	store := pkg.NewStore(testdb.db)
+	store.Bootstrap()
+
+	listIDs := []string{"abc", "def"}
+
+	testdb.Insert(pkg.Item{
+		ListID:    listIDs[0],
+		Text:      "fst",
+		IsChecked: true,
+	})
+
+	testdb.Insert(pkg.Item{
+		ListID:    listIDs[1],
+		Text:      "snd",
+		IsChecked: false,
+	})
+
+	testdb.Insert(pkg.Item{
+		ListID:    listIDs[0],
+		Text:      "another one",
+		IsChecked: false,
+	})
+
+	// Act
+	lists := store.AllLists()
+
+	// Assert
+	is.Equal(len(lists), 2)
+	for _, item := range lists {
+		found := false
+		for _, existingListID := range listIDs {
+			if existingListID == item.ListID {
+				found = true
+				break
+			}
+		}
+		is.True(found)
+	}
+}

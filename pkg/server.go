@@ -93,6 +93,17 @@ func (s *Server) wsHandler(wsupgrader *websocket.Upgrader, hub *Hub) http.Handle
 func (s *Server) eventHandler(c *Client, msg Message) {
 	// fmt.Printf("%+v : %+v\n", event, msg)
 
+	// Message doesn't include ListID
+	if msg.Method == "GetLists" {
+		for _, list := range s.store.AllLists() {
+			c.Send(Message{
+				Method: "AddList",
+				Item:   *list,
+			})
+		}
+		return
+	}
+
 	if len(msg.Item.ListID) == 0 {
 		fmt.Println(msg.Method, "called without listID")
 		return

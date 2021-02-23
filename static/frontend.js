@@ -20,6 +20,8 @@
         doneList: $('#done-list'),
         colorsBar: $('.todo__action__color'),
         actionsBtn: $('#todo__action__bar > button'),
+        listSection: $('#list-section'),
+        todoSection: $('#todo-section'),
     
         // temporary containers
         shadowTodo: document.createElement('div'),
@@ -27,6 +29,9 @@
 
         init(ws) {
             this.ws = ws;
+
+            // Reload page on navigation
+            window.addEventListener('popstate', () => location.reload())
 
             // Actions bar event handlers
 
@@ -85,6 +90,16 @@
             this.input.setAttribute('disabled', true)
         },
 
+        // Hide the element passed
+        hide(element) {
+            element.classList.add("hidden");
+        },
+
+        // Show the element passed
+        show(element) {
+            element.classList.remove("hidden");
+        },
+
         // Add a Update listener on this node
         registerChangeCallbackFn(node, item) {
             return _ => node.querySelector('input').addEventListener('change', event => {
@@ -114,7 +129,7 @@
         // Change theme callback
         onChangeTheme(color) {
             $$('.themed').forEach(el => el.style.backgroundColor = color);
-            localStorage.setItem('theme', color)
+            localStorage.setItem(UI.listId ? `theme-${UI.listId}` : 'theme', color)
         },
     
         // Called on each received item
@@ -146,6 +161,21 @@
     
                 default:
                     console.warn('unhandled', item)
+            }
+        },
+
+        onListReceived(list) {
+            switch (list.method) {
+                case "AddList":
+                    var exists = $(`#list-${list.listId.substr(1)}`)
+                    if (exists) {
+                        exists.remove();
+                    }
+                    let node = document.createElement('div')
+                    node.innerHTML = this.listTemplate(list)
+                    const listNode = document.querySelector("#todolist-list")
+                    listNode.appendChild(node)
+                    break;
             }
         },
 
@@ -200,8 +230,17 @@
                     <use xlink:href="#todo__circle" class="todo__circle"></use>
                 </svg>
                 <div class="todo__text">${item.text}</div>
-                <div class="todo__delete">╳</div>
+                <svg class="todo__delete" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
             </label>`;
+        },
+
+        listTemplate({ listId }) {
+            const name = localStorage.getItem(listId)
+            const linkText = !name || name === "" ? listId : name
+            return `<li id="list-${listId.substr(1)}"><a href="/${listId}">${linkText}</a></li>`
         },
     
         redrawFavicon(color, letter) {
@@ -259,8 +298,14 @@
         onMessage(event) {
             try {
                 var data = [].concat(JSON.parse(event.data));
-                data.forEach(item => this.ui.onItemReceived(item))
-                this.ui.commitItemReceived();
+                data.forEach(val => {
+                    if (val.method === "AddList") {
+                        this.ui.onListReceived(val)
+                        return
+                    }
+                    this.ui.onItemReceived(val)
+                    this.ui.commitItemReceived();
+                })
             } catch (e) {
                 console.error(e)
             }
@@ -268,10 +313,14 @@
     
         onOpen() {
             console.log('connection opened')
-            this.sock.send(JSON.stringify({
-                method: 'GetItems',
-                listId: this.ui.listId,
-            }))
+            if (!location.hash) {
+                WS.fetchLists()
+            } else {
+                this.sock.send(JSON.stringify({
+                    method: 'GetItems',
+                    listId: this.ui.listId,
+                }))
+            }
         },
     
         connect() {
@@ -333,16 +382,31 @@
             }, 400)
             return false
         },
+        fetchLists() {
+            setTimeout(() => {
+                this.sock.send(JSON.stringify({
+                    method: 'GetLists',
+                }))
+            }, 400)
+        }
     }
     
     // UI & transport
     if (!location.hash) {
-        // no hash, set a random one and reload
-        location.hash = UI.listId = `#${uuid()}:New List`;
-        location.reload()
+        // no hash, show a list of existing lists as well as link to create new
+        const newListElem = document.querySelector("#new-list")
+        newListElem.href = `/#${uuid()}:Untitled`;
+        UI.hide(UI.todoSection)
+        UI.show(UI.listSection)
 
+        UI.init(WS)
+        WS.init(UI)
+        WS.fetchLists()
     } else {
         // app bootstrap
+        UI.hide(UI.listSection)
+        UI.show(UI.todoSection)
+
         hashAndTitle = location.hash.split(':')
         UI.title.innerText = decodeURIComponent(hashAndTitle[1] ? hashAndTitle[1] : hashAndTitle[0])
         UI.listId = hashAndTitle[0]
@@ -352,7 +416,7 @@
     }
 
     // Theme
-    var color = localStorage.getItem('theme')
+    var color = localStorage.getItem(UI.listId ? `theme-${UI.listId}` : 'theme')
     if (color) UI.onChangeTheme(color)
 
     // List title
