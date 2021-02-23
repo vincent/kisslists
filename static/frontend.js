@@ -129,7 +129,7 @@
         // Change theme callback
         onChangeTheme(color) {
             $$('.themed').forEach(el => el.style.backgroundColor = color);
-            localStorage.setItem('theme', color)
+            localStorage.setItem(UI.listId ? `theme-${UI.listId}` : 'theme', color)
         },
     
         // Called on each received item
@@ -238,8 +238,8 @@
         },
 
         listTemplate({ listId }) {
-            const name = localStorage.getItem(listId);
-            const linkText = !name || name === "" ? listId : `${name} (${listId})`
+            const name = localStorage.getItem(listId)
+            const linkText = !name || name === "" ? listId : name
             return `<li id="list-${listId.substr(1)}"><a href="/${listId}">${linkText}</a></li>`
         },
     
@@ -395,7 +395,7 @@
     if (!location.hash) {
         // no hash, show a list of existing lists as well as link to create new
         const newListElem = document.querySelector("#new-list")
-        newListElem.href = `/#${uuid()}:New List`;
+        newListElem.href = `/#${uuid()}:Untitled`;
         UI.hide(UI.todoSection)
         UI.show(UI.listSection)
 
@@ -416,7 +416,7 @@
     }
 
     // Theme
-    var color = localStorage.getItem('theme')
+    var color = localStorage.getItem(UI.listId ? `theme-${UI.listId}` : 'theme')
     if (color) UI.onChangeTheme(color)
 
     // List title

@@ -23,8 +23,17 @@
 	</defs>
 </svg>
 
+<section id="list-section" class="todo-list padded">
+	<div class="header themed padded">
+		<h2>All lists</h2>
+		<a id="new-list">➕ Create a new list</a>
+	</div>
+	<ul id="todolist-list"></ul>
+</section>
+    
 <section id="todo-section" class="todo-list">
 	<section class="header themed padded">
+		<a id="back-arrow" href="/">❮</a>
 		<h1 id="title"></h1>
 		<div id="todo__action__bar">
 			<button type="button">☰</button>
@@ -45,14 +54,6 @@
 	</section>
 	<div id="todo-list" class="padded"></div>
 	<div id="done-list" class="padded"></div>
-</section>
-
-<section id="list-section" class="todo-list padded">
-  <div class="header themed">
-	<h2>All lists</h2>
-  </div>
-  <a id="new-list">Create new list</a>
-  <ul id="todolist-list"></ul>
 </section>
 
 <script>{{include "/autocomplete.min.js"}}</script>
