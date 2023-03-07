@@ -246,7 +246,7 @@ span.todo__icon {
 
 #todolist-list li {
     line-height: 3em;
-    border-top: 1px solid #666;
+    border-bottom: 1px solid #666;
     list-style-type: square;
 }
 
