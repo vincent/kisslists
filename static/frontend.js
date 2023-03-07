@@ -66,6 +66,11 @@
                 }
             })
     
+            // Update the title on focus loss
+            this.title.addEventListener('focusout', evt => {
+                this.onChangeTitle(this.title.innerText)
+            })
+
             // Form & Autocomplete
 
             // Add a new item on submit
