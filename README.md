@@ -30,10 +30,11 @@ but
 > available tags for linux amd64 and arm <br>
 
 ```
-kisslists:
-  image: allyouneedisgnu/kisslists
-  volumes:
-    - ./your/kisslists:/kisslists
-  ports:
-    - 80:80
+services:
+  kisslists:
+    image: allyouneedisgnu/kisslists
+    volumes:
+      - ./your/kisslists:/kisslists
+    ports:
+      - 80:80
 ```
