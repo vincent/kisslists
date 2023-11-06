@@ -4,6 +4,9 @@
     var $ = document.querySelector.bind(document);
     var $$ = document.querySelectorAll.bind(document);
     
+    var IconDelete = `<svg class="todo__delete" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+    var IconCreate = `<svg viewBox="0 0 512 512" xml:space="preserve" height="1.8em"><g><path style="fill:#F4F6F9;" d="M173.234,262.897h75.869v75.869c0,3.809,3.085,6.897,6.897,6.897c3.812,0,6.897-3.088,6.897-6.897   v-75.869h75.869c3.812,0,6.897-3.088,6.897-6.897c0-3.809-3.085-6.897-6.897-6.897h-75.869v-75.869   c0-3.809-3.085-6.897-6.897-6.897c-3.812,0-6.897,3.088-6.897,6.897v75.869h-75.869c-3.812,0-6.897,3.088-6.897,6.897   C166.337,259.809,169.422,262.897,173.234,262.897z"></path><path style="fill:#F4F6F9;" d="M414.635,90.468H97.365c-3.812,0-6.897,3.088-6.897,6.897v317.269c0,3.809,3.085,6.897,6.897,6.897   h317.269c3.812,0,6.897-3.088,6.897-6.897V97.365C421.532,93.556,418.447,90.468,414.635,90.468z M407.738,407.738H104.262V104.262   h303.475V407.738z"></path></g></svg>`;
+
     var UI = {
         // current list id
         listId: location.hash,
@@ -41,11 +44,13 @@
                 this.colorsBar.style.display = visible ? 'none' : 'block'
                 this.actionsBtn.innerText = visible ? '☰' : '—'
             })
+
             // Close the menu when press anywhere else
             this.html.addEventListener('click', evt => {
                 if (evt.target.tagName.toLowerCase() != 'button')
                     this.colorsBar.style.display = 'none', {capture:true}
             })
+
             // Change theme buttons
             $$('.todo__action__color button').forEach(el => {
                 el.addEventListener('click', evt => this.onChangeTheme(evt.target.style.backgroundColor))
@@ -58,6 +63,7 @@
                 this.title.contentEditable = true;
                 this.title.focus()
             })
+
             // Update the title on ENTER
             this.title.addEventListener('keypress', evt => {
                 if (evt.key === "Enter") {
@@ -79,6 +85,7 @@
                 this.ws.onAddItem(this.input.value.trim())
                 return false;
             })
+
             // Init autocompleter
             this.autocomplete()
         },
@@ -103,6 +110,14 @@
         // Show the element passed
         show(element) {
             element.classList.remove("hidden");
+        },
+
+        remove(element, immediate) {
+            var exists = $(element)
+            if (exists) {
+                exists.classList.add("todo_removed");
+                immediate ? exists.remove() : setTimeout(_ => exists.remove(), 1000);
+            }
         },
 
         // Add a Update listener on this node
@@ -146,17 +161,12 @@
                     break;
     
                 case 'DeleteItem':
-                    var exists = $(`#item-${item.itemId}`)
-                    if (exists) {
-                        $(`#item-${item.itemId}`).remove()
-                    }
+                    UI.remove(`#item-${item.itemId}`)
                     break;
     
                 case 'AddItem':
-                    var exists = $(`#item-${item.itemId}`)
-                    if (exists) {
-                        $(`#item-${item.itemId}`).remove()
-                    }
+                    UI.remove(`#item-${item.itemId}`, true)
+
                     var node = document.createElement('div')
                     node.innerHTML = this.itemTemplate(item)
                     setTimeout(this.registerChangeCallbackFn(node.firstElementChild, item), 1);
@@ -171,13 +181,15 @@
 
         onListReceived(list) {
             switch (list.method) {
+                case 'DeleteList':
+                    UI.remove(`#list-${list.listId.substr(1)}`)
+                    break;
+    
                 case "AddList":
-                    var exists = $(`#list-${list.listId.substr(1)}`)
-                    if (exists) {
-                        exists.remove();
-                    }
+                    UI.remove(`#list-${list.listId.substr(1)}`, true)
                     let node = document.createElement('div')
                     node.innerHTML = this.listTemplate(list)
+                    node.querySelector('.todo__delete').addEventListener('click', e => WS.onDeleteList(e, list.listId))
                     const listNode = document.querySelector("#todolist-list")
                     listNode.appendChild(node)
                     break;
@@ -235,17 +247,14 @@
                     <use xlink:href="#todo__circle" class="todo__circle"></use>
                 </svg>
                 <div class="todo__text">${item.text}</div>
-                <svg class="todo__delete" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="css-i6dzq1">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                ${IconDelete}
             </label>`;
         },
 
         listTemplate({ listId }) {
             const name = localStorage.getItem(listId)
             const linkText = !name || name === "" ? listId : name
-            return `<li id="list-${listId.substr(1)}"><a href="/${listId}">${linkText}</a></li>`
+            return `<li id="list-${listId.substr(1)}"><a href="/${listId}">${linkText}</a>${IconDelete}</li>`
         },
     
         redrawFavicon(color, letter) {
@@ -264,7 +273,7 @@
             var link = document.createElement('link');
             link.type = 'image/x-icon';
             link.rel = 'shortcut icon';
-            link.href = canvas.toDataURL("image/x-icon");
+            link.href = canvas.toDataURL('image/x-icon');
     
             $$('[rel="shortcut icon"]').forEach(el => el.remove())
             this.head.appendChild(link);
@@ -304,7 +313,7 @@
             try {
                 var data = [].concat(JSON.parse(event.data));
                 data.forEach(val => {
-                    if (val.method === "AddList") {
+                    if (val.method === "AddList" || val.method === "DeleteList") {
                         this.ui.onListReceived(val)
                         return
                     }
@@ -386,6 +395,15 @@
                 }))
             }, 400)
             return false
+        },
+        onDeleteList(event, listId) {
+            setTimeout(() => {
+                debugger;
+                this.sock.send(JSON.stringify({
+                    method: 'DeleteList',
+                    listId,
+                }))
+            }, 400)
         },
         fetchLists() {
             setTimeout(() => {

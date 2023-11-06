@@ -142,6 +142,16 @@ func (s *Server) eventHandler(c *Client, msg Message) {
 			Method: "DeleteItem",
 			Item:   msg.Item,
 		})
+
+	case "DeleteList":
+		err := s.store.DeleteList(msg.ListID)
+		if err != nil {
+			return
+		}
+		s.hub.broadcast <- Message{
+			Method: "DeleteList",
+			Item:   msg.Item,
+		}
 	}
 }
 

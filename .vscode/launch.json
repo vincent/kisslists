@@ -9,7 +9,11 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "${workspaceFolder}/main.go"
+            "program": "${workspaceFolder}/main.go",
+            "args": ["-port", ":8080", "-database", "kisslists.sqlite"],
+            "env": {
+                "CGO_ENABLED": "1",
+            }
         }
 
     ]
