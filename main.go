@@ -22,8 +22,9 @@ func main() {
 	flag.Parse()
 
 	// Test if the database is writable
-	if touch(*dbfile) != nil {
-		panic(fmt.Errorf("%v is not usable", *dbfile))
+	err := touch(*dbfile)
+	if err != nil {
+		panic(fmt.Errorf("%v is not writable: %s", *dbfile, err))
 	}
 
 	// Open database file

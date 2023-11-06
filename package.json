@@ -1,0 +1,32 @@
+{
+  "name": "kisslists",
+  "version": "1.0.0",
+  "description": "A very simple shared lists server",
+  "main": "main.go",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vincent/kisslists.git"
+  },
+  "keywords": [
+    "todo",
+    "list",
+    "shared"
+  ],
+  "author": "Vincent Lark <vincent.lark@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vincent/kisslists/issues"
+  },
+  "homepage": "https://github.com/vincent/kisslists#readme",
+  "devDependencies": {
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0"
+  }
+}

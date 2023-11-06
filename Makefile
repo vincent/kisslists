@@ -10,6 +10,7 @@ install:
 
 generate:
 	@go generate ./...
+	./node_modules/.bin/eslint static/frontend.js 
 	@echo "[OK] Files added to embed box"
 
 build: clean generate

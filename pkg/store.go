@@ -25,6 +25,7 @@ type Store interface {
 	Create(item *Item) *Item
 	update(item *Item) *Item
 	Delete(listID string, itemID int64) error
+	DeleteList(listID string) error
 	AllLists() []*Item
 }
 
@@ -52,6 +53,9 @@ func (store *SqliteStore) Bootstrap() {
 		) ;
 		CREATE INDEX idx_list_item ON ListItems (listId, itemId);
 		`)
+	if err != nil {
+		panic(err)
+	}
 	defer stmt.Close()
 	if _, err = stmt.Exec(); err != nil {
 		log.Println("created a new database")
@@ -119,6 +123,17 @@ func (store *SqliteStore) Delete(listID string, itemID int64) error {
 		DELETE FROM ListItems WHERE itemId = ?`)
 	defer stmt.Close()
 	if _, err = stmt.Exec(itemID); err != nil {
+		log.Println(err)
+	}
+	return err
+}
+
+// Delete the given list
+func (store *SqliteStore) DeleteList(listID string) error {
+	stmt, err := store.DB.Prepare(`
+		DELETE FROM ListItems WHERE listId = ?`)
+	defer stmt.Close()
+	if _, err = stmt.Exec(listID); err != nil {
 		log.Println(err)
 	}
 	return err

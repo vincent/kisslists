@@ -193,8 +193,10 @@ span.todo__icon {
 .todo__delete {
     stroke: #666;
     padding: 5px;
-    float: right;
+}
+#todo-section .todo__delete {
     top: -1.25em;
+    float: right;
     position: relative;
 }
 .todo__delete:focus,
@@ -244,10 +246,22 @@ span.todo__icon {
     padding: 0.5em 1em;
 }
 
+a#new-list {
+    align-items: center;
+    display: flex;
+}
+
 #todolist-list li {
     line-height: 3em;
     border-bottom: 1px solid #666;
     list-style-type: square;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#todolist-list li :first-child {
+    flex-grow: 2;
 }
 
 #back-arrow {
