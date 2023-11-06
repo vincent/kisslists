@@ -1,4 +1,4 @@
-name: Go
+name: Build
 
 on:
   push:
@@ -13,10 +13,19 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install modules
+      run: yarn
+
+    - name: Run ESLint
+      run: eslint static/frontend.js
+
     - name: Set up Go
       uses: actions/setup-go@v2
       with:
         go-version: 1.15
+
+    - name: Generate
+      run: go generate -v ./...
 
     - name: Build
       run: go build -v ./...
