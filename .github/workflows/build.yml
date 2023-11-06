@@ -17,7 +17,7 @@ jobs:
       run: npm install
 
     - name: Run ESLint
-      run: eslint static/frontend.js
+      run: npx eslint static/frontend.js
 
     - name: Set up Go
       uses: actions/setup-go@v2
