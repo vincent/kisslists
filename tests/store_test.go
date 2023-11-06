@@ -169,6 +169,29 @@ func TestSqliteStore_Delete(t *testing.T) {
 	is.True(found == nil)
 }
 
+func TestSqliteStore_DeleteList(t *testing.T) {
+	// Arrange
+	is := is.New(t)
+	testdb := NewTestDB()
+	defer testdb.Dispose()
+
+	store := pkg.NewStore(testdb.db)
+	store.Bootstrap()
+
+	testdb.Insert(pkg.Item{
+		ListID:    "A list",
+		Text:      "Some text",
+		IsChecked: true,
+	})
+
+	// Act
+	_ = store.DeleteList("A list")
+	items := store.FindAll("A list")
+
+	// Assert
+	is.Equal(len(items), 0)
+}
+
 func TestSqliteStore_AllLists_Empty(t *testing.T) {
 	// Arrange
 	is := is.New(t)
